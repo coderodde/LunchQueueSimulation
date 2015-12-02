@@ -1,5 +1,7 @@
 package net.coderodde.simulation.lunch;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import static net.coderodde.simulation.lunch.Utils.checkMean;
@@ -89,6 +91,17 @@ public class Simulator {
                                         sdOfLunchTimeDeviation);
         Person[] population = 
                 populationGenerator.createPopulation(populationSize);
+        
+        Map<Person, LunchTimePreferences> mapPersonToPreferences = 
+                new HashMap<>();
+        
+        for (Person person : population) {
+            mapPersonToPreferences.
+                    put(person, 
+                        populationGenerator.createRandomLunchTimePreferences());
+        }
+        
+        
     }
     
     public static void main(final String... args) {
