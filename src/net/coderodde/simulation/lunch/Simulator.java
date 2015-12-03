@@ -20,50 +20,27 @@ public class Simulator {
 
     private final int populationSize;
     
-    private final double meanOfMeanLunchTime;
-    private final double sdOfMeanLunchTime;
-    private final double meanOfLunchTimeDeviation;
-    private final double sdOfLunchTimeDeviation;
+    private final double meanLunchTime;
     private final double meanServiceTime;
-    private final double sdOfServiceTime;
+    private final double standardDeviationOfLunchTime;
+    private final double standardDeviationOfServiceTime;
     
     private final Random random;
     private final ProbabilityDistribution<AcademicDegree> degreeDistribution;
     
-    /**
-     * Creates this simulator.
-     * 
-     * @param populationSize           the size of population being simulated.
-     * @param meanOfMeanLunchTime      the mean of the mean lunch time.
-     * @param meanOfLunchTimeDeviation the mean of the standard deviation of 
-     *                                 lunch time.
-     * @param sdOfMeanLunchTime        the standard deviation of mean lunch 
-     *                                 time.
-     * @param sdOfLunchTimeDeviation   the standard deviation of the standard
-     *                                 deviation.
-     * @param meanServiceTime          the average service time.
-     * @param sdOfServiceTime          the standard deviation of service time.
-     * @param random                   the random number generator.
-     * @param degreeDistribution       the distribution of academic degrees in
-     *                                 the population.
-     */
     public Simulator(int populationSize,
-                     double meanOfMeanLunchTime,
-                     double sdOfMeanLunchTime,
-                     double meanOfLunchTimeDeviation,
-                     double sdOfLunchTimeDeviation,
+                     double meanLunchTime,
                      double meanServiceTime,
-                     double sdOfServiceTime,
+                     double standardDeviationOfLunchTime,
+                     double standardDeviationOfServiceTime,
                      Random random,
                      ProbabilityDistribution<AcademicDegree>
                              degreeDistribution) {
-        checkMean(meanOfMeanLunchTime);
-        checkMean(meanOfLunchTimeDeviation);
+        checkMean(meanLunchTime);
         checkMean(meanServiceTime);
         
-        checkStandardDeviation(sdOfMeanLunchTime);
-        checkStandardDeviation(sdOfLunchTimeDeviation);
-        checkStandardDeviation(sdOfServiceTime);
+        checkStandardDeviation(standardDeviationOfLunchTime);
+        checkStandardDeviation(standardDeviationOfServiceTime);
         
         Objects.requireNonNull(random, "Random is null.");
         Objects.requireNonNull(degreeDistribution,
@@ -71,14 +48,11 @@ public class Simulator {
         
         this.populationSize = populationSize;
         
-        this.meanOfMeanLunchTime = meanOfMeanLunchTime;
-        this.sdOfMeanLunchTime   = sdOfMeanLunchTime;
-        
-        this.meanOfLunchTimeDeviation = meanOfLunchTimeDeviation;
-        this.sdOfLunchTimeDeviation   = sdOfLunchTimeDeviation;
-        
+        this.meanLunchTime = meanLunchTime;
         this.meanServiceTime = meanServiceTime;
-        this.sdOfServiceTime = sdOfServiceTime;
+        
+        this.standardDeviationOfLunchTime = standardDeviationOfLunchTime;
+        this.standardDeviationOfServiceTime = standardDeviationOfServiceTime;
         
         this.random = random;
         this.degreeDistribution = degreeDistribution;
@@ -88,10 +62,8 @@ public class Simulator {
         PopulationGenerator populationGenerator = 
                 new PopulationGenerator(random,
                                         degreeDistribution,
-                                        meanOfMeanLunchTime,
-                                        meanOfLunchTimeDeviation,
-                                        sdOfMeanLunchTime,
-                                        sdOfLunchTimeDeviation);
+                                        meanLunchTime,
+                                        standardDeviationOfLunchTime);
         Person[] population = 
                 populationGenerator.createPopulation(populationSize);
         
@@ -110,9 +82,8 @@ public class Simulator {
         for (int i = 0; i < population.length; ++i) {
             LunchQueueEvent event = 
                     new LunchQueueEvent(population[i],
-                                        populationGenerator
-                                             .createRandomLunchTimePreferences()
-                                             .sample(random));
+                                        populationGenerator.
+                                                getRandomLunchTime());
             arrivalEventArray[i] = event;
             arrivalEventMap.put(event.getPerson(), event);
         }
@@ -139,7 +110,9 @@ public class Simulator {
             LunchQueueEvent currentEvent = QUEUE.pop();
             // Serving...
             double serviceTime = meanServiceTime + 
-                                 sdOfServiceTime * random.nextGaussian();
+                                 standardDeviationOfServiceTime * 
+                                    random.nextGaussian();
+            
             currentClock += serviceTime;
             LunchQueueEvent servedEvent = 
                     new LunchQueueEvent(currentEvent.getPerson(), currentClock);
@@ -234,15 +207,14 @@ public class Simulator {
         // All time units represent seconds.
         // For example, mean service time is 15 seconds.
         Simulator simulator = 
-                new Simulator(400,     // 400 persons going to lunch.
-                              10800.0, // On average, people go to lunch after
-                                       // 3 hours of work.
-                              1200.0,  // The average lunch time standard
-                                       // deviation: 20 minutes.
-                              1800.0,  // The mean of lunch time deviation.
-                              1000.0,  // The s.d. of lunch time deviation.
-                              20.0,    // Mean service time.
-                              5.0,     // The s.d of serice time.
+                new Simulator(400,     // Population size: 400 persons.
+                              10800.0, // On average people go to lunch after
+                                       // 3 hours of work/studying.
+                              20.0,    // The mean service time.
+                              1200.0,  // The standard deviation of the lunch 
+                                       // time: 20 minutes.
+                              5.0,     // The standard deviaition of the service
+                                       // time.
                               random,
                               degreeDistribution);
         System.out.println("Seed = " + seed);

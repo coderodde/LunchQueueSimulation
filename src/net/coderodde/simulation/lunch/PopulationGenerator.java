@@ -16,33 +16,26 @@ public class PopulationGenerator {
     
     private final Random random;
     private final ProbabilityDistribution<AcademicDegree> degreeDistribution;
-    private final double meanOfMeanLunchTime;
-    private final double meanOfLunchTimeDeviation;
-    private final double sdOfMeanLunchTime;
-    private final double sdOfLunchTimeDeviation;
+    private final double meanLunchTime;
+    private final double standardDeviationOfLunchTime;
     
     public PopulationGenerator(
             Random random, 
             ProbabilityDistribution<AcademicDegree> degreeDistribution,
-            double meanOfMeanLunchTime,
-            double meanOfLunchTimeDeviation,
-            double sdOfMeanLunchTime,
-            double sdOfLunchTimeDeviation) {
+            double meanLunchTime,
+            double standardDeviationOfLunchTime) {
         Objects.requireNonNull(random, "The random number generator is null.");
         Objects.requireNonNull(degreeDistribution, 
                                "The degree distribution is null.");
         
-        checkMean(meanOfMeanLunchTime);
-        checkMean(meanOfLunchTimeDeviation);
-        checkStandardDeviation(sdOfMeanLunchTime);
-        checkStandardDeviation(sdOfLunchTimeDeviation);
+        checkMean(meanLunchTime);
+        checkStandardDeviation(standardDeviationOfLunchTime);
         
-        this.random                   = random;
-        this.degreeDistribution       = degreeDistribution;
-        this.meanOfMeanLunchTime      = meanOfMeanLunchTime;
-        this.meanOfLunchTimeDeviation = meanOfLunchTimeDeviation;
-        this.sdOfMeanLunchTime        = sdOfMeanLunchTime;
-        this.sdOfLunchTimeDeviation   = sdOfLunchTimeDeviation;
+        this.random             = random;
+        this.degreeDistribution = degreeDistribution;
+        
+        this.meanLunchTime = meanLunchTime;
+        this.standardDeviationOfLunchTime = standardDeviationOfLunchTime;
     }
     
     public Person createRandomPerson() {
@@ -61,11 +54,9 @@ public class PopulationGenerator {
         return population;
     }
     
-    public LunchTimePreferences createRandomLunchTimePreferences() {
-        return new LunchTimePreferences(
-                meanOfMeanLunchTime + sdOfMeanLunchTime * random.nextGaussian(),
-                meanOfLunchTimeDeviation + 
-                        sdOfLunchTimeDeviation * random.nextGaussian());
+    public double getRandomLunchTime() {
+        return meanLunchTime + standardDeviationOfLunchTime * 
+                               random.nextGaussian();
     }
     
     private static final String[] FIRST_NAMES = {

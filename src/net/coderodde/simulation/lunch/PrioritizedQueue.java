@@ -21,22 +21,22 @@ public class PrioritizedQueue {
     public void push(LunchQueueEvent event) {
         switch (event.getPerson().getAcademicDegree()) {
             case UNDERGRADUATE: {
-                queueOfUndergrads.offer(event);
+                queueOfUndergrads.add(event);
                 break; 
             }
             
             case BACHELOR: {
-                queueOfBachelors.offer(event);
+                queueOfBachelors.add(event);
                 break;
             }
             
             case MASTER: {
-                queueOfMasters.offer(event);
+                queueOfMasters.add(event);
                 break;
             }
             
             case DOCTOR: {
-                queueOfDoctors.offer(event);
+                queueOfDoctors.add(event);
                 break;
             }
         }
