@@ -7,25 +7,21 @@ package net.coderodde.simulation.lunch;
  */
 public class LunchQueueEvent implements Comparable<LunchQueueEvent> {
     
-    public enum EventType {
-        ENTER_QUEUE,
-        SERVED
-    }
-    
     private final Person person;
-    private final EventType eventType;
     private final double timeStamp;
     
     public LunchQueueEvent(Person person, 
-                           EventType eventType, 
                            double timeStamp) {
         this.person = person;
-        this.eventType = eventType;
         this.timeStamp = timeStamp;
     }
     
     public Person getPerson() {
         return person;
+    }
+    
+    public double getTimestamp() {
+        return timeStamp;
     }
     
     @Override

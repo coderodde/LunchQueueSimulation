@@ -84,7 +84,7 @@ public class Simulator {
         this.degreeDistribution = degreeDistribution;
     }
     
-    public void simulate() {
+    public SimulationResult simulate() {
         PopulationGenerator populationGenerator = 
                 new PopulationGenerator(random,
                                         degreeDistribution,
@@ -103,8 +103,7 @@ public class Simulator {
         
         for (int i = 0; i < population.length; ++i) {
             LunchQueueEvent event = 
-                    new LunchQueueEvent(population[i], 
-                                        LunchQueueEvent.EventType.ENTER_QUEUE, 
+                    new LunchQueueEvent(population[i],
                                         populationGenerator
                                              .createRandomLunchTimePreferences()
                                              .sample(random));
@@ -119,16 +118,70 @@ public class Simulator {
                 new ArrayDeque<>(Arrays.asList(arrivalEventArray));
         
         PrioritizedQueue QUEUE = new PrioritizedQueue();
-        int personsServed = 0;
-        double currentClock = Double.NEGATIVE_INFINITY;
+        double currentClock = inputEventQueue.peek().getTimestamp();
         
-        while (personsServed < populationSize) {
+        while (!inputEventQueue.isEmpty()) {
+            // Load all hungry people that arrived during the service of the 
+            // previously served people.
             if (QUEUE.isEmpty()) {
-                QUEUE.push(inputEventQueue.remove());
+                while (!inputEventQueue.isEmpty()
+                        && inputEventQueue.peek().getTimestamp() 
+                        <= currentClock) {
+                    QUEUE.push(inputEventQueue.remove());
+                }
             }
             
-            
+            // Admit an earliest + highest priority person to the cashier.
+            LunchQueueEvent currentEvent = QUEUE.pop();
+            // Serving...
+            double serviceTime = meanServiceTime + 
+                                 sdOfServiceTime * random.nextGaussian();
+            currentClock += serviceTime;
+            LunchQueueEvent servedEvent = 
+                    new LunchQueueEvent(currentEvent.getPerson(), currentClock);
+            servedEventMap.put(servedEvent.getPerson(), servedEvent);
+            // Served!
         }
+        
+        // Start computing system statistics.
+        SimulationResult result = new SimulationResult();
+        Map<AcademicDegree, Double> mapMinimumWaitTime = new HashMap<>();
+        Map<AcademicDegree, Double> mapMaximumWaitTime = new HashMap<>();
+        Map<AcademicDegree, Double> mapAverageWaitTime = new HashMap<>();
+        Map<AcademicDegree, Double> mapWaitTimeSum     = new HashMap<>();
+        Map<AcademicDegree, Double> mapWaitTimeDeviation = new HashMap<>();
+        
+        for (AcademicDegree degree : AcademicDegree.values()) {
+            mapMinimumWaitTime.put(degree, Double.POSITIVE_INFINITY);
+            mapMaximumWaitTime.put(degree, Double.NEGATIVE_INFINITY);
+            mapWaitTimeSum.put(degree, 0.0);
+        }
+        
+        for (Person person : population) {
+            LunchQueueEvent arrivalEvent = arrivalEventMap.get(person);
+            LunchQueueEvent servedEvent  = servedEventMap.get(person);
+            double waitTime = servedEvent.getTimestamp() - 
+                              arrivalEvent.getTimestamp();
+            
+            AcademicDegree degree = person.getAcademicDegree();
+            
+            if (mapMinimumWaitTime.get(degree) > waitTime) {
+                mapMinimumWaitTime.put(degree, waitTime);
+            }
+            
+            if (mapMaximumWaitTime.get(degree) < waitTime) {
+                mapMaximumWaitTime.put(degree, waitTime);
+            }
+            
+            mapWaitTimeSum.put(degree, mapWaitTimeSum.get(degree) + waitTime);
+        }
+        
+        for (AcademicDegree degree : AcademicDegree.values()) {
+            double average = mapWaitTimeSum.get(degree) / populationSize;
+            mapAverageWaitTime.put(degree, average);
+        }
+        
+        return result;
     }
     
     
@@ -157,5 +210,15 @@ public class Simulator {
                               5.0,     // The s.d of serice time.
                               random,
                               degreeDistribution);
+        System.out.println("Seed = " + seed);
+        
+        long startTime = System.nanoTime();
+        SimulationResult result = simulator.simulate();
+        long endTime = System.nanoTime();
+        
+        System.out.printf("Simulated in %.2f milliseconds.\n", 
+                          (endTime - startTime) / 1e6);
+        
+        System.out.println(result);
     }
 }
