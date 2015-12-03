@@ -1,13 +1,15 @@
 package net.coderodde.simulation.lunch;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import static net.coderodde.simulation.lunch.Utils.checkMean;
 import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
-import static net.coderodde.simulation.lunch.Utils.choose;
 
 /**
- * This class facilitates random generation of person records.
+ * This class facilitates random generation of population.
  * 
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
@@ -39,22 +41,28 @@ public class PopulationGenerator {
     }
     
     public Population generate(int populationSize) {
+        List<Person> allPersonList = 
+                new ArrayList<>(FIRST_NAMES.length * LAST_NAMES.length);
+        
+        for (String firstName : FIRST_NAMES) {
+            for (String lastName : LAST_NAMES) {
+                allPersonList.add(new Person(firstName, 
+                                             lastName, 
+                                             degreeDistribution.choose()));
+            }
+        }
+        
+        Collections.shuffle(allPersonList, random);
+        populationSize = Math.min(populationSize, allPersonList.size());
+        
         Population population = new Population();
         
         for (int i = 0; i < populationSize; ++i) {
-            population.addPerson(createRandomPerson(), 
-                                 getRandomLunchTime());
+            population.addPerson(allPersonList.get(i), getRandomLunchTime());
         }
         
         return population;
     }
-    
-    private Person createRandomPerson() {
-        return new Person(choose(FIRST_NAMES, random),
-                          choose(LAST_NAMES, random),
-                          degreeDistribution.choose());
-    }
-    
     
     private double getRandomLunchTime() {
         return meanLunchTime + standardDeviationOfLunchTime * 

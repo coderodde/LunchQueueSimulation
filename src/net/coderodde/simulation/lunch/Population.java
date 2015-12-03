@@ -4,10 +4,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import static net.coderodde.simulation.lunch.Utils.checkTime;
 
 /**
@@ -18,24 +20,34 @@ import static net.coderodde.simulation.lunch.Utils.checkTime;
  */
 public class Population {
     
-    private final List<Person> personList = new ArrayList<>();
+    private final Set<Person> personSet = new HashSet<>();
     private final Map<Person, Double> arrivalTimeMap = new HashMap<>();
     
-    public void addPerson(Person person, double arrivalTime) {
+    public boolean addPerson(Person person, double arrivalTime) {
         Objects.requireNonNull(person, "The input person is null.");
         checkTime(arrivalTime);
-        personList.add(person);
+        
+        if (personSet.contains(person)) {
+            return false;
+        }
+        
+        personSet.add(person);
         arrivalTimeMap.put(person, arrivalTime);
+        return true;
     } 
+    
+    public int size() {
+        return personSet.size();
+    }
    
-    List<Person> getPersonList() {
-        return Collections.<Person>unmodifiableList(personList);
+    Set<Person> getPersonList() {
+        return Collections.<Person>unmodifiableSet(personSet);
     }
     
     Queue<LunchQueueEvent> toEventQueue() {
-        List<LunchQueueEvent> eventList = new ArrayList<>(personList.size());
+        List<LunchQueueEvent> eventList = new ArrayList<>(personSet.size());
         
-        personList.stream().forEach((person) -> {
+        personSet.stream().forEach((person) -> {
             eventList.add(new LunchQueueEvent(person, 
                                               arrivalTimeMap.get(person)));
         });

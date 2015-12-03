@@ -1,7 +1,8 @@
 package net.coderodde.simulation.lunch;
 
 /**
- *
+ * This class describes a lunch queue event.
+ * 
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015).
  */
