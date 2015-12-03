@@ -1,8 +1,11 @@
 package net.coderodde.simulation.lunch;
 
+import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
 import static net.coderodde.simulation.lunch.Utils.checkMean;
 import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
@@ -92,17 +95,42 @@ public class Simulator {
         Person[] population = 
                 populationGenerator.createPopulation(populationSize);
         
-        Map<Person, LunchTimePreferences> mapPersonToPreferences = 
-                new HashMap<>();
+        LunchQueueEvent[] arrivalEventArray = 
+                new LunchQueueEvent[populationSize];
         
-        for (Person person : population) {
-            mapPersonToPreferences.
-                    put(person, 
-                        populationGenerator.createRandomLunchTimePreferences());
+        Map<Person, LunchQueueEvent> arrivalEventMap = new HashMap<>();
+        Map<Person, LunchQueueEvent> servedEventMap = new HashMap<>();
+        
+        for (int i = 0; i < population.length; ++i) {
+            LunchQueueEvent event = 
+                    new LunchQueueEvent(population[i], 
+                                        LunchQueueEvent.EventType.ENTER_QUEUE, 
+                                        populationGenerator
+                                             .createRandomLunchTimePreferences()
+                                             .sample(random));
+            arrivalEventArray[i] = event;
+            arrivalEventMap.put(event.getPerson(), event);
         }
         
+        // Order the queue entry events by their arrival time stamps.
+        Arrays.sort(arrivalEventArray);
         
+        Queue<LunchQueueEvent> inputEventQueue = 
+                new ArrayDeque<>(Arrays.asList(arrivalEventArray));
+        
+        PrioritizedQueue QUEUE = new PrioritizedQueue();
+        int personsServed = 0;
+        double currentClock = Double.NEGATIVE_INFINITY;
+        
+        while (personsServed < populationSize) {
+            if (QUEUE.isEmpty()) {
+                QUEUE.push(inputEventQueue.remove());
+            }
+            
+            
+        }
     }
+    
     
     public static void main(final String... args) {
         long seed = System.nanoTime();
