@@ -38,23 +38,25 @@ public class PopulationGenerator {
         this.standardDeviationOfLunchTime = standardDeviationOfLunchTime;
     }
     
-    public Person createRandomPerson() {
-        return new Person(choose(FIRST_NAMES, random),
-                          choose(LAST_NAMES, random),
-                          degreeDistribution.choose());
-    }
-    
-    public Person[] createPopulation(int size) {
-        Person[] population = new Person[size];
+    public Population generate(int populationSize) {
+        Population population = new Population();
         
-        for (int i = 0; i < size; ++i) {
-            population[i] = createRandomPerson();
+        for (int i = 0; i < populationSize; ++i) {
+            population.addPerson(createRandomPerson(), 
+                                 getRandomLunchTime());
         }
         
         return population;
     }
     
-    public double getRandomLunchTime() {
+    private Person createRandomPerson() {
+        return new Person(choose(FIRST_NAMES, random),
+                          choose(LAST_NAMES, random),
+                          degreeDistribution.choose());
+    }
+    
+    
+    private double getRandomLunchTime() {
         return meanLunchTime + standardDeviationOfLunchTime * 
                                random.nextGaussian();
     }

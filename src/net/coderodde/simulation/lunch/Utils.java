@@ -54,4 +54,16 @@ public class Utils {
                     "The standard deviation is negative: " + deviation);
         }
     }
+    
+    public static void checkTime(double time) {
+        if (Double.isNaN(time)) {
+            throw new IllegalArgumentException(
+                    "The input time is NaN (not-a-number).");
+        }
+        
+        if (Double.isInfinite(time)) {
+            throw new IllegalArgumentException(
+                    "The input time is infinite: " + time);
+        }
+    }
 }

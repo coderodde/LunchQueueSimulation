@@ -58,17 +58,17 @@ public class Simulator {
         this.degreeDistribution = degreeDistribution;
     }
     
-    public SimulationResult simulate() {
-        PopulationGenerator populationGenerator = 
-                new PopulationGenerator(random,
-                                        degreeDistribution,
-                                        meanLunchTime,
-                                        standardDeviationOfLunchTime);
-        Person[] population = 
-                populationGenerator.createPopulation(populationSize);
-        
-        LunchQueueEvent[] arrivalEventArray = 
-                new LunchQueueEvent[populationSize];
+    public SimulationResult simulate(Population population) {
+//        PopulationGenerator populationGenerator = 
+//                new PopulationGenerator(random,
+//                                        degreeDistribution,
+//                                        meanLunchTime,
+//                                        standardDeviationOfLunchTime);
+//        Person[] population = 
+//                populationGenerator.createPopulation(populationSize);
+//        
+//        LunchQueueEvent[] arrivalEventArray = 
+//                new LunchQueueEvent[populationSize];
         
         Map<Person, LunchQueueEvent> arrivalEventMap = new HashMap<>();
         Map<Person, LunchQueueEvent> servedEventMap = new HashMap<>();
@@ -106,17 +106,24 @@ public class Simulator {
                 QUEUE.push(inputEventQueue.remove());
             }
             
+            if (QUEUE.isEmpty()) {
+                LunchQueueEvent headEvent = inputEventQueue.remove();
+                QUEUE.push(headEvent);
+                currentClock = headEvent.getTimestamp();
+            }
+            
             // Admit an earliest + highest priority person to the cashier.
             LunchQueueEvent currentEvent = QUEUE.pop();
+            Person currentPerson = currentEvent.getPerson();
             // Serving...
             double serviceTime = meanServiceTime + 
                                  standardDeviationOfServiceTime * 
                                     random.nextGaussian();
             
             currentClock += serviceTime;
-            LunchQueueEvent servedEvent = 
-                    new LunchQueueEvent(currentEvent.getPerson(), currentClock);
-            servedEventMap.put(servedEvent.getPerson(), servedEvent);
+            LunchQueueEvent servedEvent = new LunchQueueEvent(currentPerson, 
+                                                              currentClock);
+            servedEventMap.put(currentPerson, servedEvent);
             // Served!
         }
         
