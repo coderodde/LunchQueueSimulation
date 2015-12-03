@@ -28,6 +28,10 @@ public class Population {
         arrivalTimeMap.put(person, arrivalTime);
     } 
    
+    List<Person> getPersonList() {
+        return Collections.<Person>unmodifiableList(personList);
+    }
+    
     Queue<LunchQueueEvent> toEventQueue() {
         List<LunchQueueEvent> eventList = new ArrayList<>(personList.size());
         

@@ -18,82 +18,36 @@ import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
  */
 public class Simulator {
 
-    private final int populationSize;
-    
-    private final double meanLunchTime;
     private final double meanServiceTime;
-    private final double standardDeviationOfLunchTime;
     private final double standardDeviationOfServiceTime;
     
     private final Random random;
-    private final ProbabilityDistribution<AcademicDegree> degreeDistribution;
     
-    public Simulator(int populationSize,
-                     double meanLunchTime,
-                     double meanServiceTime,
-                     double standardDeviationOfLunchTime,
+    public Simulator(double meanServiceTime,
                      double standardDeviationOfServiceTime,
-                     Random random,
-                     ProbabilityDistribution<AcademicDegree>
-                             degreeDistribution) {
-        checkMean(meanLunchTime);
+                     Random random) {
         checkMean(meanServiceTime);
-        
-        checkStandardDeviation(standardDeviationOfLunchTime);
         checkStandardDeviation(standardDeviationOfServiceTime);
-        
         Objects.requireNonNull(random, "Random is null.");
-        Objects.requireNonNull(degreeDistribution,
-                              "The degree distribution is null.");
         
-        this.populationSize = populationSize;
-        
-        this.meanLunchTime = meanLunchTime;
         this.meanServiceTime = meanServiceTime;
-        
-        this.standardDeviationOfLunchTime = standardDeviationOfLunchTime;
         this.standardDeviationOfServiceTime = standardDeviationOfServiceTime;
-        
         this.random = random;
-        this.degreeDistribution = degreeDistribution;
     }
     
     public SimulationResult simulate(Population population) {
-//        PopulationGenerator populationGenerator = 
-//                new PopulationGenerator(random,
-//                                        degreeDistribution,
-//                                        meanLunchTime,
-//                                        standardDeviationOfLunchTime);
-//        Person[] population = 
-//                populationGenerator.createPopulation(populationSize);
-//        
-//        LunchQueueEvent[] arrivalEventArray = 
-//                new LunchQueueEvent[populationSize];
-        
+        Queue<LunchQueueEvent> inputEventQueue = population.toEventQueue();
         Map<Person, LunchQueueEvent> arrivalEventMap = new HashMap<>();
         Map<Person, LunchQueueEvent> servedEventMap = new HashMap<>();
         Map<AcademicDegree, Integer> groupCounts = new HashMap<>();
         
-        for (Person person : population) {
+        for (LunchQueueEvent event : inputEventQueue) {
+            Person person = event.getPerson();
+            arrivalEventMap.put(person, event);
             AcademicDegree degree = person.getAcademicDegree();
             groupCounts.put(degree, groupCounts.getOrDefault(degree, 0) + 1);
         }
-        
-        for (int i = 0; i < population.length; ++i) {
-            LunchQueueEvent event = 
-                    new LunchQueueEvent(population[i],
-                                        populationGenerator.
-                                                getRandomLunchTime());
-            arrivalEventArray[i] = event;
-            arrivalEventMap.put(event.getPerson(), event);
-        }
-        
-        // Order the queue entry events by their arrival time stamps.
-        Arrays.sort(arrivalEventArray);
-        
-        Queue<LunchQueueEvent> inputEventQueue = 
-                new ArrayDeque<>(Arrays.asList(arrivalEventArray));
-        
+
         PrioritizedQueue QUEUE = new PrioritizedQueue();
         double currentClock = inputEventQueue.peek().getTimestamp();
         
@@ -141,7 +95,7 @@ public class Simulator {
         }
         
         // Computing minimum/maximum wait time for each academic degree.
-        for (Person person : population) {
+        for (Person person : population.getPersonList()) {
             LunchQueueEvent arrivalEvent = arrivalEventMap.get(person);
             LunchQueueEvent servedEvent  = servedEventMap.get(person);
             double waitTime = servedEvent.getTimestamp() - 
@@ -167,7 +121,7 @@ public class Simulator {
             mapAverageWaitTime.put(degree, average);
         }
         
-        for (Person person : population) {
+        for (Person person : population.getPersonList()) {
             AcademicDegree degree = person.getAcademicDegree();
             double duration = servedEventMap.get(person).getTimestamp() -
                               arrivalEventMap.get(person).getTimestamp();
@@ -199,7 +153,6 @@ public class Simulator {
         return result;
     }
     
-    
     public static void main(final String... args) {
         long seed = System.nanoTime();
         Random random = new Random(seed);
@@ -211,23 +164,26 @@ public class Simulator {
         degreeDistribution.add(AcademicDegree.BACHELOR,      65.0f);
         degreeDistribution.add(AcademicDegree.UNDERGRADUATE, 100.0f);
         
+        PopulationGenerator populationGenerator = 
+                new PopulationGenerator(random,
+                                        degreeDistribution,
+                                        10800.0,
+                                        1200.0);
+        
         // All time units represent seconds.
         // For example, mean service time is 15 seconds.
         Simulator simulator = 
-                new Simulator(400,     // Population size: 400 persons.
-                              10800.0, // On average people go to lunch after
-                                       // 3 hours of work/studying.
-                              20.0,    // The mean service time.
-                              1200.0,  // The standard deviation of the lunch 
-                                       // time: 20 minutes.
-                              5.0,     // The standard deviaition of the service
-                                       // time.
-                              random,
-                              degreeDistribution);
+                new Simulator(20.0, // The mean service time is 20 seconds.
+                              5.0,  // The standard deviaition of the service
+                                    // time is 5 seconds.
+                              random);
+        
         System.out.println("Seed = " + seed);
         
         long startTime = System.nanoTime();
-        SimulationResult result = simulator.simulate();
+        // Simulate a population of 400 hungry people.
+        SimulationResult result = 
+                simulator.simulate(populationGenerator.generate(400));
         long endTime = System.nanoTime();
         
         System.out.printf("Simulated in %.2f milliseconds.\n", 
