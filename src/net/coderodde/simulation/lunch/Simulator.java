@@ -100,6 +100,12 @@ public class Simulator {
         
         Map<Person, LunchQueueEvent> arrivalEventMap = new HashMap<>();
         Map<Person, LunchQueueEvent> servedEventMap = new HashMap<>();
+        Map<AcademicDegree, Integer> groupCounts = new HashMap<>();
+        
+        for (Person person : population) {
+            AcademicDegree degree = person.getAcademicDegree();
+            groupCounts.put(degree, groupCounts.getOrDefault(degree, 0) + 1);
+        }
         
         for (int i = 0; i < population.length; ++i) {
             LunchQueueEvent event = 
@@ -122,13 +128,11 @@ public class Simulator {
         
         while (!inputEventQueue.isEmpty()) {
             // Load all hungry people that arrived during the service of the 
-            // previously served people.
-            if (QUEUE.isEmpty()) {
-                while (!inputEventQueue.isEmpty()
-                        && inputEventQueue.peek().getTimestamp() 
-                        <= currentClock) {
-                    QUEUE.push(inputEventQueue.remove());
-                }
+            // previously served person.
+            while (!inputEventQueue.isEmpty()
+                    && inputEventQueue.peek().getTimestamp() 
+                    <= currentClock) {
+                QUEUE.push(inputEventQueue.remove());
             }
             
             // Admit an earliest + highest priority person to the cashier.
@@ -144,7 +148,6 @@ public class Simulator {
         }
         
         // Start computing system statistics.
-        SimulationResult result = new SimulationResult();
         Map<AcademicDegree, Double> mapMinimumWaitTime = new HashMap<>();
         Map<AcademicDegree, Double> mapMaximumWaitTime = new HashMap<>();
         Map<AcademicDegree, Double> mapAverageWaitTime = new HashMap<>();
@@ -157,6 +160,7 @@ public class Simulator {
             mapWaitTimeSum.put(degree, 0.0);
         }
         
+        // Computing minimum/maximum wait time for each academic degree.
         for (Person person : population) {
             LunchQueueEvent arrivalEvent = arrivalEventMap.get(person);
             LunchQueueEvent servedEvent  = servedEventMap.get(person);
@@ -176,9 +180,40 @@ public class Simulator {
             mapWaitTimeSum.put(degree, mapWaitTimeSum.get(degree) + waitTime);
         }
         
+        // Computing the average waiting time for each academic degree.
         for (AcademicDegree degree : AcademicDegree.values()) {
-            double average = mapWaitTimeSum.get(degree) / populationSize;
+            double average = mapWaitTimeSum.get(degree) / 
+                             groupCounts.get(degree);
             mapAverageWaitTime.put(degree, average);
+        }
+        
+        for (Person person : population) {
+            AcademicDegree degree = person.getAcademicDegree();
+            double duration = servedEventMap.get(person).getTimestamp() -
+                              arrivalEventMap.get(person).getTimestamp();
+            double contribution = duration - mapAverageWaitTime.get(degree);
+            contribution *= contribution;
+            mapWaitTimeDeviation.put(degree, 
+                                     contribution + 
+                                     mapWaitTimeDeviation.getOrDefault(degree, 
+                                                                       0.0));
+        }
+        
+        for (AcademicDegree degree : AcademicDegree.values()) {
+            double sum = mapWaitTimeDeviation.get(degree);
+            mapWaitTimeDeviation.put(degree, 
+                                     Math.sqrt(sum / groupCounts.get(degree)));
+        }
+        
+        SimulationResult result = new SimulationResult();
+        
+        for (AcademicDegree degree : AcademicDegree.values()) {
+            result.putWaitMinimumTime(degree, mapMinimumWaitTime.get(degree));
+            result.putWaitMaximumTime(degree, mapMaximumWaitTime.get(degree));
+            result.putAverageWaitTime(degree, mapAverageWaitTime.get(degree));
+            result.putWaitTimeStandardDeviation(degree,
+                                                mapWaitTimeDeviation
+                                                        .get(degree));
         }
         
         return result;
