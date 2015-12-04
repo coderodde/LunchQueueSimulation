@@ -1,10 +1,12 @@
 package net.coderodde.simulation.lunch;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import static net.coderodde.simulation.lunch.Utils.checkMean;
 import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
 
@@ -46,6 +48,7 @@ public class Simulator {
             groupCounts.put(degree, groupCounts.getOrDefault(degree, 0) + 1);
         }
 
+        Set<AcademicDegree> presentDegrees = new HashSet<>();
         PrioritizedQueue QUEUE = new PrioritizedQueue();
         double currentClock = inputEventQueue.peek().getTimestamp();
         int personsPending = population.size();
@@ -68,6 +71,8 @@ public class Simulator {
             // Admit an earliest + highest priority person to the cashier.
             LunchQueueEvent currentEvent = QUEUE.pop();
             Person currentPerson = currentEvent.getPerson();
+            presentDegrees.add(currentPerson.getAcademicDegree());
+            
             // Serving...
             double serviceTime = meanServiceTime + 
                                  standardDeviationOfServiceTime * 
@@ -87,7 +92,7 @@ public class Simulator {
         Map<AcademicDegree, Double> mapWaitTimeSum     = new HashMap<>();
         Map<AcademicDegree, Double> mapWaitTimeDeviation = new HashMap<>();
         
-        for (AcademicDegree degree : AcademicDegree.values()) {
+        for (AcademicDegree degree : presentDegrees) {
             mapMinimumWaitTime.put(degree, Double.POSITIVE_INFINITY);
             mapMaximumWaitTime.put(degree, Double.NEGATIVE_INFINITY);
             mapWaitTimeSum.put(degree, 0.0);
@@ -97,6 +102,7 @@ public class Simulator {
         for (Person person : population.getPersonSet()) {
             LunchQueueEvent arrivalEvent = arrivalEventMap.get(person);
             LunchQueueEvent servedEvent  = servedEventMap.get(person);
+            
             double waitTime = servedEvent.getTimestamp() - 
                               arrivalEvent.getTimestamp();
             
@@ -114,25 +120,28 @@ public class Simulator {
         }
         
         // Computing the average waiting time for each academic degree.
-        for (AcademicDegree degree : AcademicDegree.values()) {
+        for (AcademicDegree degree : presentDegrees) {
             double average = mapWaitTimeSum.get(degree) / 
                              groupCounts.get(degree);
             mapAverageWaitTime.put(degree, average);
+            mapWaitTimeDeviation.put(degree, 0.0);
         }
         
         for (Person person : population.getPersonSet()) {
             AcademicDegree degree = person.getAcademicDegree();
+            
             double duration = servedEventMap.get(person).getTimestamp() -
                               arrivalEventMap.get(person).getTimestamp();
+            
             double contribution = duration - mapAverageWaitTime.get(degree);
+            
             contribution *= contribution;
             mapWaitTimeDeviation.put(degree, 
-                                     contribution + 
-                                     mapWaitTimeDeviation.getOrDefault(degree, 
-                                                                       0.0));
+                                     mapWaitTimeDeviation.get(degree) +
+                                             contribution);
         }
         
-        for (AcademicDegree degree : AcademicDegree.values()) {
+        for (AcademicDegree degree : presentDegrees) {
             double sum = mapWaitTimeDeviation.get(degree);
             mapWaitTimeDeviation.put(degree, 
                                      Math.sqrt(sum / groupCounts.get(degree)));
@@ -140,7 +149,7 @@ public class Simulator {
         
         SimulationResult result = new SimulationResult();
         
-        for (AcademicDegree degree : AcademicDegree.values()) {
+        for (AcademicDegree degree : presentDegrees) {
             result.putWaitMinimumTime(degree, mapMinimumWaitTime.get(degree));
             result.putWaitMaximumTime(degree, mapMaximumWaitTime.get(degree));
             result.putAverageWaitTime(degree, mapAverageWaitTime.get(degree));
@@ -153,27 +162,43 @@ public class Simulator {
     }
     
     public static void main(final String... args) {
+//        Person person1 = new Person("Al", "Funky", AcademicDegree.UNDERGRADUATE);
+//        Person person2 = new Person("El", "Funky", AcademicDegree.UNDERGRADUATE);
+//        Person person3 = new Person("Ol", "Funky", AcademicDegree.UNDERGRADUATE);
+//        
+//        Population population = new Population();
+//        
+//        population.addPerson(person1, 0.0);
+//        population.addPerson(person2, 0.0);
+//        population.addPerson(person3, 0.0);
+//        
+//        SimulationResult result1 =  new Simulator(15.0, 2.0, new Random(0)).simulate(population);
+//        String s = result1.toString();
+//        System.out.println(s);
+//        
+//        System.exit(0);
+        
         long seed = System.nanoTime();
-        Random random = new Random(10);
+        Random random = new Random(seed);
         ProbabilityDistribution<AcademicDegree> degreeDistribution = 
                 new ProbabilityDistribution<>();
         
-        degreeDistribution.add(AcademicDegree.DOCTOR,        30.0f);
-        degreeDistribution.add(AcademicDegree.MASTER,        43.0f);
-        degreeDistribution.add(AcademicDegree.BACHELOR,      65.0f);
+        degreeDistribution.add(AcademicDegree.DOCTOR,        5.0f);
+        degreeDistribution.add(AcademicDegree.MASTER,        10.0f);
+        degreeDistribution.add(AcademicDegree.BACHELOR,      30.0f);
         degreeDistribution.add(AcademicDegree.UNDERGRADUATE, 100.0f);
         
         RandomPopulationGenerator populationGenerator = 
                 new RandomPopulationGenerator(random,
                                         degreeDistribution,
                                         10800.0,
-                                        1200.0);
+                                        1800.0);
         
         // All time units represent seconds.
         // For example, mean service time is 15 seconds.
         Simulator simulator = 
-                new Simulator(20.0, // The mean service time is 20 seconds.
-                              5.0,  // The standard deviaition of the service
+                new Simulator(15.0, // The mean service time is 20 seconds.
+                              2.0,  // The standard deviaition of the service
                                     // time is 5 seconds.
                               random);
         

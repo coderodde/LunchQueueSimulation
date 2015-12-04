@@ -66,13 +66,29 @@ public class SimulationResult {
     
     private void toString(StringBuilder sb, AcademicDegree degree) {
         sb.append(degree.toString()).append(":").append(NL);
-        sb.append(SKIP).append("Average wait time: ")
-                       .append(getWaitAverage(degree)).append(NL);
-        sb.append(SKIP).append("Wait time standard deviation: ")
-                       .append(getWaitStandardDeviation(degree)).append(NL);
-        sb.append(SKIP).append("Minimum wait time: ")
-                       .append(getMinimumWaitTime(degree)).append(NL);
-        sb.append(SKIP).append("Maximum wait time: ")
-                       .append(getMaximumWaitTime(degree)).append(NL);
+        
+        sb.append(SKIP)
+          .append("Average wait time: ")
+          .append(String.format("%.0f", getWaitAverage(degree)))
+          .append(" seconds.")
+          .append(NL);
+        
+        sb.append(SKIP)
+          .append("Wait time standard deviation: ")
+          .append(String.format("%.0f", getWaitStandardDeviation(degree)))
+          .append(" seconds.")
+          .append(NL);
+        
+        sb.append(SKIP)
+          .append("Minimum wait time: ")
+          .append(String.format("%.0f", getMinimumWaitTime(degree)))
+          .append(" seconds.")
+          .append(NL);
+        
+        sb.append(SKIP)
+          .append("Maximum wait time: ")
+          .append(String.format("%.0f", getMaximumWaitTime(degree)))
+          .append(" seconds.")
+          .append(NL);
     }
 }
