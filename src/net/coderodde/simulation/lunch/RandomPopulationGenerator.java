@@ -14,14 +14,14 @@ import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public class PopulationGenerator {
+public class RandomPopulationGenerator {
     
     private final Random random;
     private final ProbabilityDistribution<AcademicDegree> degreeDistribution;
     private final double meanLunchTime;
     private final double standardDeviationOfLunchTime;
     
-    public PopulationGenerator(
+    public RandomPopulationGenerator(
             Random random, 
             ProbabilityDistribution<AcademicDegree> degreeDistribution,
             double meanLunchTime,

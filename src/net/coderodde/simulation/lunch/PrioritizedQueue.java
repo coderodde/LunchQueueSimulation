@@ -42,6 +42,13 @@ public class PrioritizedQueue {
         }
     }
     
+    public int size() {
+        return queueOfUndergrads.size() + 
+                queueOfBachelors.size() +
+                queueOfMasters.size() +
+                queueOfDoctors.size();
+    }
+    
     public boolean isEmpty() {
         return queueOfUndergrads.isEmpty() 
                 && queueOfBachelors.isEmpty()

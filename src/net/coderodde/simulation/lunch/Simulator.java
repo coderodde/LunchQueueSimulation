@@ -48,8 +48,9 @@ public class Simulator {
 
         PrioritizedQueue QUEUE = new PrioritizedQueue();
         double currentClock = inputEventQueue.peek().getTimestamp();
+        int personsPending = population.size();
         
-        while (!inputEventQueue.isEmpty()) {
+        while (personsPending > 0) {
             // Load all hungry people that arrived during the service of the 
             // previously served person.
             while (!inputEventQueue.isEmpty()
@@ -71,11 +72,11 @@ public class Simulator {
             double serviceTime = meanServiceTime + 
                                  standardDeviationOfServiceTime * 
                                     random.nextGaussian();
-            
             currentClock += serviceTime;
             LunchQueueEvent servedEvent = new LunchQueueEvent(currentPerson, 
                                                               currentClock);
             servedEventMap.put(currentPerson, servedEvent);
+            personsPending--;
             // Served!
         }
         
@@ -93,7 +94,7 @@ public class Simulator {
         }
         
         // Computing minimum/maximum wait time for each academic degree.
-        for (Person person : population.getPersonList()) {
+        for (Person person : population.getPersonSet()) {
             LunchQueueEvent arrivalEvent = arrivalEventMap.get(person);
             LunchQueueEvent servedEvent  = servedEventMap.get(person);
             double waitTime = servedEvent.getTimestamp() - 
@@ -119,7 +120,7 @@ public class Simulator {
             mapAverageWaitTime.put(degree, average);
         }
         
-        for (Person person : population.getPersonList()) {
+        for (Person person : population.getPersonSet()) {
             AcademicDegree degree = person.getAcademicDegree();
             double duration = servedEventMap.get(person).getTimestamp() -
                               arrivalEventMap.get(person).getTimestamp();
@@ -153,7 +154,7 @@ public class Simulator {
     
     public static void main(final String... args) {
         long seed = System.nanoTime();
-        Random random = new Random(seed);
+        Random random = new Random(10);
         ProbabilityDistribution<AcademicDegree> degreeDistribution = 
                 new ProbabilityDistribution<>();
         
@@ -162,8 +163,8 @@ public class Simulator {
         degreeDistribution.add(AcademicDegree.BACHELOR,      65.0f);
         degreeDistribution.add(AcademicDegree.UNDERGRADUATE, 100.0f);
         
-        PopulationGenerator populationGenerator = 
-                new PopulationGenerator(random,
+        RandomPopulationGenerator populationGenerator = 
+                new RandomPopulationGenerator(random,
                                         degreeDistribution,
                                         10800.0,
                                         1200.0);

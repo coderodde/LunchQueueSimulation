@@ -20,34 +20,32 @@ import static net.coderodde.simulation.lunch.Utils.checkTime;
  */
 public class Population {
     
-    private final Set<Person> personSet = new HashSet<>();
     private final Map<Person, Double> arrivalTimeMap = new HashMap<>();
     
     public boolean addPerson(Person person, double arrivalTime) {
         Objects.requireNonNull(person, "The input person is null.");
         checkTime(arrivalTime);
         
-        if (personSet.contains(person)) {
+        if (arrivalTimeMap.containsKey(person)) {
             return false;
         }
         
-        personSet.add(person);
         arrivalTimeMap.put(person, arrivalTime);
         return true;
     } 
     
     public int size() {
-        return personSet.size();
+        return arrivalTimeMap.size();
     }
    
-    Set<Person> getPersonList() {
-        return Collections.<Person>unmodifiableSet(personSet);
+    Set<Person> getPersonSet() {
+        return Collections.<Person>unmodifiableSet(arrivalTimeMap.keySet());
     }
     
     Queue<LunchQueueEvent> toEventQueue() {
-        List<LunchQueueEvent> eventList = new ArrayList<>(personSet.size());
+        List<LunchQueueEvent> eventList = new ArrayList<>(size());
         
-        personSet.stream().forEach((person) -> {
+        getPersonSet().stream().forEach((person) -> {
             eventList.add(new LunchQueueEvent(person, 
                                               arrivalTimeMap.get(person)));
         });

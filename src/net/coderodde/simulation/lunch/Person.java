@@ -14,6 +14,7 @@ public class Person {
     private final String lastName;
     private final AcademicDegree academicDegree;
     private final String stringRepresentation;
+    private final String identity;
     
     public Person(String firstName, 
                   String lastName, 
@@ -26,22 +27,9 @@ public class Person {
         this.lastName       = lastName;
         this.academicDegree = academicDegree;
         
-        // +11 for delimiter characters and the length of the degree 
-        // description.
-        StringBuilder sb = 
-                new StringBuilder(firstName.length() + 
-                                  lastName.length() + 
-                                  academicDegree.toString().length() + 5);
-        
-        sb.append("[")
-          .append(firstName)
-          .append(" ")
-          .append(lastName)
-          .append(", ")
-          .append(academicDegree)
-          .append("]");
-        
-        this.stringRepresentation = sb.toString();
+        this.stringRepresentation = "[" + firstName + " " + lastName + ", " + 
+                                          academicDegree + "]";
+        this.identity = firstName + " " + lastName;
     }
     
     public String getFirstName() {
@@ -63,7 +51,7 @@ public class Person {
     
     @Override
     public int hashCode() {
-        return stringRepresentation.hashCode();
+        return identity.hashCode();
     }
 
     @Override
@@ -77,6 +65,6 @@ public class Person {
         }
         
         Person other = (Person) obj;
-        return Objects.equals(stringRepresentation, other.stringRepresentation);
+        return Objects.equals(identity, other.identity);
     }
 }
