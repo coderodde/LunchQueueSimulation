@@ -1,6 +1,9 @@
 package net.coderodde.simulation.lunch;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +23,9 @@ public class SimulationResult {
     private final Map<AcademicDegree, Double> waitMinMap = new HashMap<>();
     private final Map<AcademicDegree, Double> waitMaxMap = new HashMap<>();
     
+    private final Map<Person, LunchQueueEvent> arrivalEventMap;
+    private final Map<Person, LunchQueueEvent> servedEventMap;
+    
     public double getWaitAverage(AcademicDegree degree) {
         return waitAverageMap.getOrDefault(degree, Double.NaN);
     }
@@ -34,6 +40,12 @@ public class SimulationResult {
     
     public double getMaximumWaitTime(AcademicDegree degree) {
         return waitMaxMap.getOrDefault(degree, Double.NaN);
+    }
+    
+    SimulationResult(Map<Person, LunchQueueEvent> arrivalEventMap,
+                     Map<Person, LunchQueueEvent> servedEventMap) {
+        this.arrivalEventMap = arrivalEventMap;
+        this.servedEventMap = servedEventMap;
     }
     
     void putAverageWaitTime(AcademicDegree degree, double averageTime) {
@@ -56,6 +68,29 @@ public class SimulationResult {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        List<Person> personList = new ArrayList<>(arrivalEventMap.keySet());
+        
+        Collections.<Person>sort(personList, 
+                                (p1, p2) -> {
+            double arrivalTime1 = arrivalEventMap.get(p1).getTimestamp();
+            double servedTime1 = servedEventMap.get(p1).getTimestamp();
+
+            double arrivalTime2 = arrivalEventMap.get(p2).getTimestamp();
+            double servedTime2 = servedEventMap.get(p2).getTimestamp();
+            
+            return Double.compare(servedTime1 - arrivalTime1, 
+                                  servedTime2 - arrivalTime2);
+        });
+        
+        for (Person person : personList) {
+            sb.append(person.toString())
+              .append(", wait time: ")
+              .append((int)(servedEventMap.get(person).getTimestamp() -
+                            arrivalEventMap.get(person).getTimestamp()))
+              .append(" seconds.")
+              .append(NL);
+        }
+        
         toString(sb, AcademicDegree.DOCTOR);
         toString(sb, AcademicDegree.MASTER);
         toString(sb, AcademicDegree.BACHELOR);

@@ -37,7 +37,7 @@ public class Simulator {
         preprocess(population);
         
         if (population.size() == 0) {
-            return new SimulationResult();
+            return new SimulationResult(arrivalEventMap, servedEventMap);
         }
         
         PrioritizedQueue QUEUE = new PrioritizedQueue();
@@ -156,7 +156,8 @@ public class Simulator {
                                      Math.sqrt(sum / groupCounts.get(degree)));
         }
         
-        SimulationResult result = new SimulationResult();
+        SimulationResult result = new SimulationResult(arrivalEventMap, 
+                                                       servedEventMap);
         
         for (AcademicDegree degree : groupCounts.keySet()) {
             result.putWaitMinimumTime(degree, mapMinimumWaitTime.get(degree));
@@ -201,9 +202,8 @@ public class Simulator {
                         .withDegreeCount(AcademicDegree.BACHELOR,      100)
                         .withDegreeCount(AcademicDegree.UNDERGRADUATE, 250)
                         .withMeanLunchTime(10800.0)
-                        .withLunchTimeStandardDeviation(1800.0);
+                        .withLunchTimeStandardDeviation(2000.0);
                         
-        
         // Cashier serves in average in 15 seconds, s.d. 2 seconds.
         cashier = Cashier.withRandom(random)
                          .withMeanServiceTime(15.0)

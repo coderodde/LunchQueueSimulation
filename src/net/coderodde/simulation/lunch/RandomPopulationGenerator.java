@@ -28,7 +28,6 @@ public class RandomPopulationGenerator {
                 new HashMap<>();
         private Random random;
         private double meanLunchTime;
-        private double standardDeviationOfLunchTime;
     }
     
     public static final class DegreeSelector {
@@ -73,7 +72,7 @@ public class RandomPopulationGenerator {
                     configuration.random,
                     configuration.distribution,
                     configuration.meanLunchTime,
-                    configuration.standardDeviationOfLunchTime).generate();
+                    lunchTimeStandardDeviation).generate();
         }
     }
     

@@ -28,12 +28,6 @@ public class Cashier {
         return withRandom(new Random());
     }
     
-    private static final class Configuration {
-        private Random random;
-        private double meanServiceTime;
-        private double standardDeviationOfServiceTime;
-    }
-    
     public final static class MeanServiceTimeSelector {
         
         private final Configuration configuration;
@@ -62,7 +56,7 @@ public class Cashier {
                 double standardDeviationOfServiceTime) {
             checkStandardDeviation(standardDeviationOfServiceTime);
             return new Cashier(configuration.meanServiceTime,
-                               configuration.standardDeviationOfServiceTime,
+                               standardDeviationOfServiceTime,
                                configuration.random);
         }
     }
@@ -78,5 +72,10 @@ public class Cashier {
     public double getServiceTime() {
         return meanServiceTime + standardDeviationOfServiceTime * 
                                  random.nextGaussian();
+    }
+    
+    private static final class Configuration {
+        private Random random;
+        private double meanServiceTime;
     }
 }
