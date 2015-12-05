@@ -119,7 +119,6 @@ public final class RandomPopulationGenerator {
         }
     }
     
-    
     private RandomPopulationGenerator(Random random, 
                                       Map<AcademicDegree, Integer> distribution,
                                       double meanLunchTime,

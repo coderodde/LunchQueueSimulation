@@ -16,11 +16,6 @@ public final class Person {
     private final String stringRepresentation;
     private final String identity;
     
-    private static final class Configuration {
-        private String firstName;
-        private String lastName;
-    }
-    
     public static LastNameSelector withFirstName(String firstName) {
         Objects.requireNonNull(firstName, 
                                "The first name of a person is null.");
@@ -106,5 +101,10 @@ public final class Person {
         
         Person other = (Person) obj;
         return Objects.equals(identity, other.identity);
+    }
+    
+    private static final class Configuration {
+        private String firstName;
+        private String lastName;
     }
 }

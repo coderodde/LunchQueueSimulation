@@ -2,6 +2,7 @@ package net.coderodde.simulation.lunch;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 
 /**
@@ -18,6 +19,7 @@ public final class Simulator {
     private final Map<Person, LunchQueueEvent> servedEventMap = 
             new HashMap<>();
     private final Map<AcademicDegree, Integer> groupCounts = new HashMap<>();
+    
     private final Map<AcademicDegree, Double> mapMinimumWaitTime = 
             new HashMap<>();
     private final Map<AcademicDegree, Double> mapMaximumWaitTime = 
@@ -32,7 +34,34 @@ public final class Simulator {
     private Queue<LunchQueueEvent> inputEventQueue;
     private Population population;
     
-    public SimulationResult simulate(Population population, Cashier cashier) {
+    public static PopulationSelector simulate() {
+        
+        return new PopulationSelector();
+    }
+    
+    public static final class PopulationSelector {
+        
+        public CashierSelector withPopulation(Population population) {
+            Objects.requireNonNull(population, "The input population is null.");
+            return new CashierSelector(population);
+        }
+    }
+    
+    public static final class CashierSelector {
+        
+        private final Population population;
+        
+        CashierSelector(Population population) {
+            this.population = population;
+        }
+        
+        public SimulationResult withCashier(Cashier cashier) {
+            Objects.requireNonNull(cashier, "The input cashier is null.");
+            return new Simulator().simulate(population, cashier);
+        }
+    }
+    
+    private SimulationResult simulate(Population population, Cashier cashier) {
         preprocess(population);
         
         if (population.size() == 0) {
@@ -76,14 +105,6 @@ public final class Simulator {
     }
     
     private void preprocess(Population population) {
-        arrivalEventMap.clear();
-        servedEventMap.clear();
-        mapMinimumWaitTime.clear();
-        mapMaximumWaitTime.clear();
-        mapAverageWaitTime.clear();
-        mapWaitTimeSum.clear();
-        mapWaitTimeDeviation.clear();
-        
         this.population = population;
         this.inputEventQueue = population.toEventQueue();
 

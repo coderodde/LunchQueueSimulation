@@ -27,10 +27,6 @@ final class PrioritizedQueue {
         ++size;
     }
     
-    int size() {
-        return size;
-    }
-    
     boolean isEmpty() {
         return size == 0;
     }

@@ -37,11 +37,13 @@ public static void main(final String... args) {
         population.addPerson(person2).withArrivalTime(0.0);
         population.addPerson(person3).withArrivalTime(0.0);
         
-        SimulationResult result1 =  new Simulator().simulate(population, cashier);
+        SimulationResult result1 = Simulator.simulate()
+                                            .withPopulation(population)
+                                            .withCashier(cashier);
         String s = result1.toString();
         System.out.println(s);
         
-        System.exit(0);
+//        System.exit(0);
         
         long seed = System.nanoTime();
         Random random = new Random(seed);
@@ -64,7 +66,9 @@ public static void main(final String... args) {
         System.out.println("Seed = " + seed);
         
         long startTime = System.nanoTime();
-        SimulationResult result = new Simulator().simulate(population, cashier);
+        SimulationResult result = Simulator.simulate()
+                                           .withPopulation(population)
+                                           .withCashier(cashier);
         long endTime = System.nanoTime();
         
         System.out.printf("Simulated in %.2f milliseconds.\n", 
