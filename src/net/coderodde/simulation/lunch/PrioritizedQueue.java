@@ -1,8 +1,10 @@
 package net.coderodde.simulation.lunch;
 
 import java.util.ArrayDeque;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.TreeMap;
 
 /**
  * This class implements a FIFO queue over priority categories. Not to be 
@@ -11,71 +13,39 @@ import java.util.Queue;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 3, 2015)
  */
-public class PrioritizedQueue {
+final class PrioritizedQueue {
    
-    private final Queue<LunchQueueEvent> queueOfDoctors    = new ArrayDeque<>();
-    private final Queue<LunchQueueEvent> queueOfMasters    = new ArrayDeque<>();
-    private final Queue<LunchQueueEvent> queueOfBachelors  = new ArrayDeque<>();
-    private final Queue<LunchQueueEvent> queueOfUndergrads = new ArrayDeque<>();
+    private final Map<AcademicDegree, Queue<LunchQueueEvent>> map 
+            = new TreeMap<>();
     
-    public void push(LunchQueueEvent event) {
-        switch (event.getPerson().getAcademicDegree()) {
-            case UNDERGRADUATE: {
-                queueOfUndergrads.add(event);
-                break; 
-            }
-            
-            case BACHELOR: {
-                queueOfBachelors.add(event);
-                break;
-            }
-            
-            case MASTER: {
-                queueOfMasters.add(event);
-                break;
-            }
-            
-            case DOCTOR: {
-                queueOfDoctors.add(event);
-                break;
-            }
-        }
+    private int size;
+    
+    void push(LunchQueueEvent event) {
+        AcademicDegree degree = event.getPerson().getAcademicDegree();
+        map.putIfAbsent(degree, new ArrayDeque<>());
+        map.get(degree).add(event);
+        ++size;
     }
     
-    public int size() {
-        return queueOfUndergrads.size() + 
-                queueOfBachelors.size() +
-                queueOfMasters.size() +
-                queueOfDoctors.size();
+    int size() {
+        return size;
     }
     
-    public boolean isEmpty() {
-        return queueOfUndergrads.isEmpty() 
-                && queueOfBachelors.isEmpty()
-                && queueOfMasters.isEmpty()
-                && queueOfDoctors.isEmpty();
+    boolean isEmpty() {
+        return size == 0;
     }
     
-    public LunchQueueEvent pop() {
+    LunchQueueEvent pop() {
         if (isEmpty()) {
             throw new NoSuchElementException(
                     "Popping from an empty prioritized queue.");
         }
         
-        if (!queueOfDoctors.isEmpty()) {
-            return queueOfDoctors.remove();
-        }
-        
-        if (!queueOfMasters.isEmpty()) {
-            return queueOfMasters.remove();
-        }
-        
-        if (!queueOfBachelors.isEmpty()) {
-            return queueOfBachelors.remove();
-        }
-        
-        if (!queueOfUndergrads.isEmpty()) {
-            return queueOfUndergrads.remove();
+        for (Queue<LunchQueueEvent> queue : map.values()) {
+            if (!queue.isEmpty()) {
+                --size;
+                return queue.remove();
+            }
         }
         
         throw new IllegalStateException(

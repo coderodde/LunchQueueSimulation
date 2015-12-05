@@ -12,7 +12,7 @@ import java.util.Map;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public class SimulationResult {
+public final class SimulationResult {
 
     private static final String NL = "\n";
     private static final String SKIP = "    ";
@@ -20,6 +20,7 @@ public class SimulationResult {
     private final Map<AcademicDegree, Double> waitAverageMap = new HashMap<>();
     private final Map<AcademicDegree, Double> waitStandardDeviationMap = 
             new HashMap<>();
+    
     private final Map<AcademicDegree, Double> waitMinMap = new HashMap<>();
     private final Map<AcademicDegree, Double> waitMaxMap = new HashMap<>();
     

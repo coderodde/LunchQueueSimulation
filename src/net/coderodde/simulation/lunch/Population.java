@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,21 +17,33 @@ import static net.coderodde.simulation.lunch.Utils.checkTime;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 3, 2015)
  */
-public class Population {
+public final class Population {
     
     private final Map<Person, Double> arrivalTimeMap = new HashMap<>();
     
-    public boolean addPerson(Person person, double arrivalTime) {
-        Objects.requireNonNull(person, "The input person is null.");
-        checkTime(arrivalTime);
-        
-        if (arrivalTimeMap.containsKey(person)) {
-            return false;
+    public final class ArrivalTimeSelector {
+        private final Person person;
+
+        ArrivalTimeSelector(Person person) {
+            this.person = Objects.requireNonNull(person,
+                                                 "The input person is null.");
         }
         
-        arrivalTimeMap.put(person, arrivalTime);
-        return true;
-    } 
+        public boolean withArrivalTime(double arrivalTime) {
+            checkTime(arrivalTime);
+            
+            if (arrivalTimeMap.containsKey(person)) {
+                return false;
+            }
+            
+            arrivalTimeMap.put(person, arrivalTime);
+            return true;
+        }
+    }
+    
+    public ArrivalTimeSelector addPerson(Person person) {
+        return new ArrivalTimeSelector(person);
+    }
     
     public int size() {
         return arrivalTimeMap.size();

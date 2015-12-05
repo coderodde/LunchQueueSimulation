@@ -1,6 +1,7 @@
 import java.util.Random;
 import net.coderodde.simulation.lunch.AcademicDegree;
 import net.coderodde.simulation.lunch.Cashier;
+import net.coderodde.simulation.lunch.Person;
 import net.coderodde.simulation.lunch.Population;
 import net.coderodde.simulation.lunch.RandomPopulationGenerator;
 import net.coderodde.simulation.lunch.SimulationResult;
@@ -11,21 +12,36 @@ public static void main(final String... args) {
         Cashier cashier;
         Population population;
         
-//        Person person1 = new Person("Al", "Funky", AcademicDegree.UNDERGRADUATE);
-//        Person person2 = new Person("El", "Funky", AcademicDegree.UNDERGRADUATE);
-//        Person person3 = new Person("Ol", "Funky", AcademicDegree.UNDERGRADUATE);
-//        cashier = new Cashier(12.0, 0.0, new Random(1));
-//        population = new Population();
-//        
-//        population.addPerson(person1, 0.0);
-//        population.addPerson(person2, 0.0);
-//        population.addPerson(person3, 0.0);
-//        
-//        SimulationResult result1 =  new Simulator().simulate(population, cashier);
-//        String s = result1.toString();
-//        System.out.println(s);
-//        
-//        System.exit(0);
+        Person person1 = 
+                Person.withFirstName("Al")
+                      .withLastName("Funky")
+                      .withAcademicDegree(AcademicDegree.UNDERGRADUATE);
+        
+        Person person2 = 
+                Person.withFirstName("El")
+                      .withLastName("Funky")
+                      .withAcademicDegree(AcademicDegree.UNDERGRADUATE);
+        
+        Person person3 = 
+                Person.withFirstName("Ol")
+                      .withLastName("Funky")
+                      .withAcademicDegree(AcademicDegree.UNDERGRADUATE);
+        
+        cashier = Cashier.withDefaultRandom()
+                         .withMeanServiceTime(12.0)
+                         .withStandardDeviationOfServiceTime(0.0);
+        
+        population = new Population();
+        
+        population.addPerson(person1).withArrivalTime(0.0);
+        population.addPerson(person2).withArrivalTime(0.0);
+        population.addPerson(person3).withArrivalTime(0.0);
+        
+        SimulationResult result1 =  new Simulator().simulate(population, cashier);
+        String s = result1.toString();
+        System.out.println(s);
+        
+        System.exit(0);
         
         long seed = System.nanoTime();
         Random random = new Random(seed);

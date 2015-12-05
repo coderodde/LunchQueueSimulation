@@ -6,7 +6,7 @@ package net.coderodde.simulation.lunch;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public class Utils {
+public final class Utils {
    
     public static void checkMean(double mean) {
         if (Double.isNaN(mean)) {

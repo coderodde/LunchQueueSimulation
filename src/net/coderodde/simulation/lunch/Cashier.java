@@ -11,7 +11,7 @@ import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 4, 2015)
  */
-public class Cashier {
+public final class Cashier {
     
     private final double meanServiceTime;
     private final double standardDeviationOfServiceTime;

@@ -16,7 +16,7 @@ import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public class RandomPopulationGenerator {
+public final class RandomPopulationGenerator {
     
     private final Random random;
     private final Map<AcademicDegree, Integer> distribution;
@@ -161,9 +161,10 @@ public class RandomPopulationGenerator {
                     break outer;
                 }
                 
-                allPersonList.add(new Person(firstName, 
-                                             lastName, 
-                                             degreeList.get(i++)));
+                allPersonList.add(Person.withFirstName(firstName)
+                                        .withLastName(lastName)
+                                        .withAcademicDegree(degreeList.get(i)));
+                ++i;
             }
         }
         
@@ -173,7 +174,8 @@ public class RandomPopulationGenerator {
         Population population = new Population();
         
         for (i = 0; i < populationSize; ++i) {
-            population.addPerson(allPersonList.get(i), getRandomLunchTime());
+            population.addPerson(allPersonList.get(i))
+                      .withArrivalTime(getRandomLunchTime());
         }
         
         return population;

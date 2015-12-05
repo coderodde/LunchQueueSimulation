@@ -10,7 +10,7 @@ import java.util.Queue;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public class Simulator {
+public final class Simulator {
 
     //// Internals.
     private final Map<Person, LunchQueueEvent> arrivalEventMap = 

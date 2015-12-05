@@ -8,10 +8,10 @@ package net.coderodde.simulation.lunch;
  */
 public enum AcademicDegree {
    
-    UNDERGRADUATE("Undergraduate"),
-    BACHELOR("BSc"),
-    MASTER("MSc"),
-    DOCTOR("PhD");
+    DOCTOR       ("PhD"),
+    MASTER       ("MSc"),
+    BACHELOR     ("BSc"),
+    UNDERGRADUATE("Undergraduate");
     
     private final String description;
     

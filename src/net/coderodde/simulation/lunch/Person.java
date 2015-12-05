@@ -8,7 +8,7 @@ import java.util.Objects;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public class Person {
+public final class Person {
 
     private final String firstName;
     private final String lastName;
@@ -16,17 +16,57 @@ public class Person {
     private final String stringRepresentation;
     private final String identity;
     
-    public Person(String firstName, 
-                  String lastName, 
-                  AcademicDegree academicDegree) {
-        Objects.requireNonNull(firstName,      "The first name is null.");
-        Objects.requireNonNull(lastName,       "The last name is null.");
-        Objects.requireNonNull(academicDegree, "The academic degree is null.");
+    private static final class Configuration {
+        private String firstName;
+        private String lastName;
+    }
+    
+    public static LastNameSelector withFirstName(String firstName) {
+        Objects.requireNonNull(firstName, 
+                               "The first name of a person is null.");
+        Configuration configuration = new Configuration();
+        configuration.firstName = firstName;
+        return new LastNameSelector(configuration);
+    }
+    
+    public static final class LastNameSelector {
         
+        private final Configuration configuration;
+        
+        private LastNameSelector(Configuration configuration) {
+            this.configuration = configuration;
+        }
+        
+        public AcademicDegreeSelector withLastName(String lastName) {
+            Objects.requireNonNull(lastName, 
+                                   "The last name of a person is null.");
+            configuration.lastName = lastName;
+            return new AcademicDegreeSelector(configuration);
+        }
+    }
+    
+    public static final class AcademicDegreeSelector {
+        
+        private final Configuration configuration;
+        
+        AcademicDegreeSelector(Configuration configuration) {
+            this.configuration = configuration;
+        }
+        
+        public Person withAcademicDegree(AcademicDegree degree) {
+            Objects.requireNonNull(degree, "The academic degree is null.");
+            return new Person(configuration.firstName,
+                              configuration.lastName,
+                              degree);
+        }
+    }
+    
+    private Person(String firstName, 
+                   String lastName, 
+                   AcademicDegree academicDegree) {
         this.firstName      = firstName;
         this.lastName       = lastName;
         this.academicDegree = academicDegree;
-        
         this.stringRepresentation = "[" + firstName + " " + lastName + ", " + 
                                           academicDegree + "]";
         this.identity = firstName + " " + lastName;
