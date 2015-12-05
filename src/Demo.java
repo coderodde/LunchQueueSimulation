@@ -8,7 +8,8 @@ import net.coderodde.simulation.lunch.SimulationResult;
 import net.coderodde.simulation.lunch.Simulator;
 
 public class Demo {
-public static void main(final String... args) {
+    
+    public static void main(final String... args) {
         Cashier cashier;
         Population population;
         
