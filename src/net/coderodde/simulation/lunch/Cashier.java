@@ -17,6 +17,12 @@ public class Cashier {
     private final double standardDeviationOfServiceTime;
     private final Random random;
     
+    /**
+     * Initiates a strong fluent API for creating a {@code Cashier}.
+     * 
+     * @param  random the random number generator to use.
+     * @return the mean service time selector.
+     */
     public static MeanServiceTimeSelector withRandom(Random random) {
         Objects.requireNonNull(random, "The input Random is null.");
         Configuration configuration = new Configuration();
@@ -24,6 +30,12 @@ public class Cashier {
         return new MeanServiceTimeSelector(configuration);
     }
     
+    /**
+     * Initiates a strong fluent API for creating a {@code Cashier} using a 
+     * default random number generator.
+     * 
+     * @return the mean service time selector. 
+     */
     public static MeanServiceTimeSelector withDefaultRandom() {
         return withRandom(new Random());
     }
@@ -36,6 +48,13 @@ public class Cashier {
             this.configuration = configuration;
         }
         
+        /**
+         * Selects the mean service time and returns a standard deviation 
+         * selector.
+         * 
+         * @param  meanServiceTime the mean service time in seconds.
+         * @return a standard deviation selector.
+         */
         public StandardDeviationSelector 
             withMeanServiceTime(double meanServiceTime) {
             checkMean(meanServiceTime);
@@ -52,6 +71,14 @@ public class Cashier {
             this.configuration = configuration;
         }
         
+        /**
+         * Selects a standard deviation for the service time and returns the 
+         * {@code Cashier} using the gathered parameters.
+         * 
+         * @param  standardDeviationOfServiceTime the standard deviation of the
+         *                                        service time in seconds.
+         * @return a {@code Cashier} object.
+         */
         public Cashier withStandardDeviationOfServiceTime(
                 double standardDeviationOfServiceTime) {
             checkStandardDeviation(standardDeviationOfServiceTime);

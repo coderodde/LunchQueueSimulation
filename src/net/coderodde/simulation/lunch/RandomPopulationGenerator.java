@@ -23,11 +23,28 @@ public class RandomPopulationGenerator {
     private final double meanLunchTime;
     private final double standardDeviationOfLunchTime;
     
-    private static final class Configuration {
-        private final Map<AcademicDegree, Integer> distribution = 
-                new HashMap<>();
-        private Random random;
-        private double meanLunchTime;
+    /**
+     * Initiates the strong fluent API for constructing a 
+     * {@code RandomPopulationGenerator}.
+     * 
+     * @param  random the random number generator to use.
+     * @return a degree selector.
+     */
+    public static DegreeSelector withRandom(Random random) {
+        Objects.requireNonNull(random, "The input Random is null.");
+        Configuration configuration = new Configuration();
+        configuration.random = random;
+        return new DegreeSelector(configuration);
+    }
+    
+    /**
+     * Initiates the strong fluent API for constructing a 
+     * {@code RandomPopulationGenerator} using the default {@code Random}.
+     * 
+     * @return a degree selector.
+     */
+    public static DegreeSelector withDefaultRandom() {
+        return withRandom(new Random());
     }
     
     public static final class DegreeSelector {
@@ -38,7 +55,15 @@ public class RandomPopulationGenerator {
             this.configuration = configuration;
         }
         
-        DegreeSelector withDegreeCount(AcademicDegree degree, int count) {
+        /**
+         * Assigns the desired count to an {@code AcademicDegree}.
+         * 
+         * @param degree the target degree.
+         * @param count  the amount of persons with {@code degree}.
+         * @return this degree selector for further additions.
+         */
+        public DegreeSelector withDegreeCount(AcademicDegree degree, 
+                                              int count) {
             Objects.requireNonNull(degree, "The input degree is null.");
             
             if (count <= 0) {
@@ -50,7 +75,17 @@ public class RandomPopulationGenerator {
             return this;
         }
         
-        StandardDeviationSelector withMeanLunchTime(double meanLunchTime) {
+        /**
+         * Selects the mean lunch time and returns the standard deviation 
+         * selector.
+         * 
+         * @param  meanLunchTime the mean lunch time in seconds. (Not duration,
+         *                       but rather the time at which people 
+         *                       <b>go</b> to lunch.
+         * @return standard deviation selector.
+         */
+        public StandardDeviationSelector 
+            withMeanLunchTime(double meanLunchTime) {
             checkMean(meanLunchTime);
             configuration.meanLunchTime = meanLunchTime;
             return new StandardDeviationSelector(configuration);
@@ -65,6 +100,14 @@ public class RandomPopulationGenerator {
             this.configuration = configuration;
         }
         
+        /**
+         * Selects the standard deviation and generates a population with
+         * specified parameters.
+         * 
+         * @param  lunchTimeStandardDeviation the standard deviation of the 
+         *                                    times at which people go to lunch.
+         * @return a population.
+         */
         public Population withLunchTimeStandardDeviation(
                 double lunchTimeStandardDeviation) {
             checkStandardDeviation(lunchTimeStandardDeviation);
@@ -76,16 +119,6 @@ public class RandomPopulationGenerator {
         }
     }
     
-    public static DegreeSelector withRandom(Random random) {
-        Objects.requireNonNull(random, "The input Random is null.");
-        Configuration configuration = new Configuration();
-        configuration.random = random;
-        return new DegreeSelector(configuration);
-    }
-    
-    public static DegreeSelector withDefaultRandom() {
-        return withRandom(new Random());
-    }
     
     private RandomPopulationGenerator(Random random, 
                                       Map<AcademicDegree, Integer> distribution,
@@ -149,6 +182,14 @@ public class RandomPopulationGenerator {
     private double getRandomLunchTime() {
         return meanLunchTime + standardDeviationOfLunchTime * 
                                random.nextGaussian();
+    }
+    
+    private static final class Configuration {
+        private final Map<AcademicDegree, Integer> distribution = 
+                new HashMap<>();
+        
+        private Random random;
+        private double meanLunchTime;
     }
     
     private static final String[] FIRST_NAMES = {
