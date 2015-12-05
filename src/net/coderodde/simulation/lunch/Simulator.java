@@ -2,7 +2,6 @@ package net.coderodde.simulation.lunch;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.Random;
 
@@ -34,30 +33,12 @@ public class Simulator {
     private Queue<LunchQueueEvent> inputEventQueue;
     private Population population;
     
-    private void preprocess(Population population) {
-        arrivalEventMap.clear();
-        servedEventMap.clear();
-        mapMinimumWaitTime.clear();
-        mapMaximumWaitTime.clear();
-        mapAverageWaitTime.clear();
-        mapWaitTimeSum.clear();
-        mapWaitTimeDeviation.clear();
-        
-        this.population = population;
-        inputEventQueue = population.toEventQueue();
-
-        // groupCounts.keySet() will now list only those academic degrees that
-        // are present in the population.
-        for (LunchQueueEvent event : inputEventQueue) {
-            Person person = event.getPerson();
-            arrivalEventMap.put(person, event);
-            AcademicDegree degree = person.getAcademicDegree();
-            groupCounts.put(degree, groupCounts.getOrDefault(degree, 0) + 1);
-        }
-    }
-    
     public SimulationResult simulate(Population population, Cashier cashier) {
         preprocess(population);
+        
+        if (population.size() == 0) {
+            return new SimulationResult();
+        }
         
         PrioritizedQueue QUEUE = new PrioritizedQueue();
         double currentClock = inputEventQueue.peek().getTimestamp();
@@ -93,6 +74,28 @@ public class Simulator {
         }
         
         return postprocess();
+    }
+    
+    private void preprocess(Population population) {
+        arrivalEventMap.clear();
+        servedEventMap.clear();
+        mapMinimumWaitTime.clear();
+        mapMaximumWaitTime.clear();
+        mapAverageWaitTime.clear();
+        mapWaitTimeSum.clear();
+        mapWaitTimeDeviation.clear();
+        
+        this.population = population;
+        this.inputEventQueue = population.toEventQueue();
+
+        // groupCounts.keySet() will now list only those academic degrees that
+        // are present in the population.
+        for (LunchQueueEvent event : inputEventQueue) {
+            Person person = event.getPerson();
+            arrivalEventMap.put(person, event);
+            AcademicDegree degree = person.getAcademicDegree();
+            groupCounts.put(degree, groupCounts.getOrDefault(degree, 0) + 1);
+        }
     }
     
     private SimulationResult postprocess() {
@@ -168,48 +171,45 @@ public class Simulator {
     }
     
     public static void main(final String... args) {
-        Person person1 = new Person("Al", "Funky", AcademicDegree.UNDERGRADUATE);
-        Person person2 = new Person("El", "Funky", AcademicDegree.UNDERGRADUATE);
-        Person person3 = new Person("Ol", "Funky", AcademicDegree.UNDERGRADUATE);
-        Cashier cashier = new Cashier(12.0, 0.0, new Random(1));
-        Population population = new Population();
+        Cashier cashier;
+        Population population;
         
-        population.addPerson(person1, 0.0);
-        population.addPerson(person2, 0.0);
-        population.addPerson(person3, 0.0);
-        
-        SimulationResult result1 =  new Simulator().simulate(population, cashier);
-        String s = result1.toString();
-        System.out.println(s);
-        
-        System.exit(0);
+//        Person person1 = new Person("Al", "Funky", AcademicDegree.UNDERGRADUATE);
+//        Person person2 = new Person("El", "Funky", AcademicDegree.UNDERGRADUATE);
+//        Person person3 = new Person("Ol", "Funky", AcademicDegree.UNDERGRADUATE);
+//        cashier = new Cashier(12.0, 0.0, new Random(1));
+//        population = new Population();
+//        
+//        population.addPerson(person1, 0.0);
+//        population.addPerson(person2, 0.0);
+//        population.addPerson(person3, 0.0);
+//        
+//        SimulationResult result1 =  new Simulator().simulate(population, cashier);
+//        String s = result1.toString();
+//        System.out.println(s);
+//        
+//        System.exit(0);
         
         long seed = System.nanoTime();
         Random random = new Random(seed);
-        ProbabilityDistribution<AcademicDegree> degreeDistribution = 
-                new ProbabilityDistribution<>();
         
-        // Degree distribution:
-        degreeDistribution.add(AcademicDegree.DOCTOR,        5.0f);
-        degreeDistribution.add(AcademicDegree.MASTER,        10.0f);
-        degreeDistribution.add(AcademicDegree.BACHELOR,      30.0f);
-        degreeDistribution.add(AcademicDegree.UNDERGRADUATE, 100.0f);
-        
-        RandomPopulationGenerator populationGenerator = 
-                new RandomPopulationGenerator(random,
-                                        degreeDistribution,
-                                        10800.0,
-                                        1800.0);
+        population = 
+                RandomPopulationGenerator
+                        .withRandom(random)
+                        .withDegreeCount(AcademicDegree.DOCTOR,        15)
+                        .withDegreeCount(AcademicDegree.MASTER,        40)
+                        .withDegreeCount(AcademicDegree.BACHELOR,      100)
+                        .withDegreeCount(AcademicDegree.UNDERGRADUATE, 250)
+                        .withMeanLunchTime(10800.0)
+                        .withLunchTimeStandardDeviation(1800.0);
+                        
         
         // Cashier serves in average in 15 seconds, s.d. 2 seconds.
         cashier = new Cashier(15.0, 2.0, random);
         System.out.println("Seed = " + seed);
         
         long startTime = System.nanoTime();
-        // Simulate a population of 400 hungry people.
-        SimulationResult result = new Simulator()
-                .simulate(populationGenerator.generate(400), 
-                          cashier);
+        SimulationResult result = new Simulator().simulate(population, cashier);
         long endTime = System.nanoTime();
         
         System.out.printf("Simulated in %.2f milliseconds.\n", 

@@ -2,7 +2,9 @@ package net.coderodde.simulation.lunch;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import static net.coderodde.simulation.lunch.Utils.checkMean;
@@ -17,38 +19,119 @@ import static net.coderodde.simulation.lunch.Utils.checkStandardDeviation;
 public class RandomPopulationGenerator {
     
     private final Random random;
-    private final ProbabilityDistribution<AcademicDegree> degreeDistribution;
+    private final Map<AcademicDegree, Integer> distribution;
     private final double meanLunchTime;
     private final double standardDeviationOfLunchTime;
     
-    public RandomPopulationGenerator(
-            Random random, 
-            ProbabilityDistribution<AcademicDegree> degreeDistribution,
-            double meanLunchTime,
-            double standardDeviationOfLunchTime) {
-        Objects.requireNonNull(random, "The random number generator is null.");
-        Objects.requireNonNull(degreeDistribution, 
-                               "The degree distribution is null.");
+    private static final class Configuration {
+        private final Map<AcademicDegree, Integer> distribution = 
+                new HashMap<>();
+        private Random random;
+        private double meanLunchTime;
+        private double standardDeviationOfLunchTime;
+    }
+    
+    public static final class DegreeSelector {
         
-        checkMean(meanLunchTime);
-        checkStandardDeviation(standardDeviationOfLunchTime);
+        private final Configuration configuration;
         
-        this.random             = random;
-        this.degreeDistribution = degreeDistribution;
+        DegreeSelector(Configuration configuration) {
+            this.configuration = configuration;
+        }
         
+        DegreeSelector withDegreeCount(AcademicDegree degree, int count) {
+            Objects.requireNonNull(degree, "The input degree is null.");
+            
+            if (count <= 0) {
+                throw new IllegalArgumentException(
+                        "The degree count is not positive: " + count);
+            }
+            
+            configuration.distribution.put(degree, count);
+            return this;
+        }
+        
+        StandardDeviationSelector withMeanLunchTime(double meanLunchTime) {
+            checkMean(meanLunchTime);
+            configuration.meanLunchTime = meanLunchTime;
+            return new StandardDeviationSelector(configuration);
+        }
+    }
+    
+    public static final class StandardDeviationSelector {
+        
+        private final Configuration configuration;
+        
+        StandardDeviationSelector(Configuration configuration) {
+            this.configuration = configuration;
+        }
+        
+        public Population withLunchTimeStandardDeviation(
+                double lunchTimeStandardDeviation) {
+            checkStandardDeviation(lunchTimeStandardDeviation);
+            return new RandomPopulationGenerator(
+                    configuration.random,
+                    configuration.distribution,
+                    configuration.meanLunchTime,
+                    configuration.standardDeviationOfLunchTime).generate();
+        }
+    }
+    
+    public static DegreeSelector withRandom(Random random) {
+        Objects.requireNonNull(random, "The input Random is null.");
+        Configuration configuration = new Configuration();
+        configuration.random = random;
+        return new DegreeSelector(configuration);
+    }
+    
+    public static DegreeSelector withDefaultRandom() {
+        return withRandom(new Random());
+    }
+    
+    private RandomPopulationGenerator(Random random, 
+                                      Map<AcademicDegree, Integer> distribution,
+                                      double meanLunchTime,
+                                      double standardDeviationOfLunchTime) {
+        this.random       = random;
+        this.distribution = distribution;
         this.meanLunchTime = meanLunchTime;
         this.standardDeviationOfLunchTime = standardDeviationOfLunchTime;
     }
     
-    public Population generate(int populationSize) {
+    public Population generate() {
+        int populationSize = 0;
+        
+        for (Map.Entry<AcademicDegree, Integer> entry : distribution.entrySet()) {
+            populationSize += entry.getValue();
+        }
+        
         List<Person> allPersonList = 
                 new ArrayList<>(FIRST_NAMES.length * LAST_NAMES.length);
         
+        List<AcademicDegree> degreeList = new ArrayList<>(populationSize);
+        
+        for (AcademicDegree degree : AcademicDegree.values()) {
+            int count = distribution.getOrDefault(degree, 0);
+            
+            for (int i = 0; i < count; ++i) {
+                degreeList.add(degree);
+            }
+        }
+        
+        
+        Collections.<AcademicDegree>shuffle(degreeList, random);
+        int i = 0;
+        
+        outer:
         for (String firstName : FIRST_NAMES) {
             for (String lastName : LAST_NAMES) {
+                if (i == degreeList.size()) {
+                    break outer;
+                }
+                
                 allPersonList.add(new Person(firstName, 
                                              lastName, 
-                                             degreeDistribution.choose()));
+                                             degreeList.get(i++)));
             }
         }
         
@@ -57,7 +140,7 @@ public class RandomPopulationGenerator {
         
         Population population = new Population();
         
-        for (int i = 0; i < populationSize; ++i) {
+        for (i = 0; i < populationSize; ++i) {
             population.addPerson(allPersonList.get(i), getRandomLunchTime());
         }
         

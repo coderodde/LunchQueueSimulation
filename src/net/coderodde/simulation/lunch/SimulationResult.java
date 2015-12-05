@@ -68,7 +68,7 @@ public class SimulationResult {
         sb.append(degree.toString()).append(":").append(NL);
         
         sb.append(SKIP)
-          .append("Average wait time: ")
+          .append("Average wait time:            ")
           .append(String.format("%.0f", getWaitAverage(degree)))
           .append(" seconds.")
           .append(NL);
@@ -80,13 +80,13 @@ public class SimulationResult {
           .append(NL);
         
         sb.append(SKIP)
-          .append("Minimum wait time: ")
+          .append("Minimum wait time:            ")
           .append(String.format("%.0f", getMinimumWaitTime(degree)))
           .append(" seconds.")
           .append(NL);
         
         sb.append(SKIP)
-          .append("Maximum wait time: ")
+          .append("Maximum wait time:            ")
           .append(String.format("%.0f", getMaximumWaitTime(degree)))
           .append(" seconds.")
           .append(NL);
