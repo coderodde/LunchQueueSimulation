@@ -205,7 +205,10 @@ public class Simulator {
                         
         
         // Cashier serves in average in 15 seconds, s.d. 2 seconds.
-        cashier = new Cashier(15.0, 2.0, random);
+        cashier = Cashier.withRandom(random)
+                         .withMeanServiceTime(15.0)
+                         .withStandardDeviationOfServiceTime(2.0);
+        
         System.out.println("Seed = " + seed);
         
         long startTime = System.nanoTime();

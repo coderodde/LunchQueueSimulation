@@ -17,13 +17,59 @@ public class Cashier {
     private final double standardDeviationOfServiceTime;
     private final Random random;
     
-    public Cashier(double meanServiceTime, 
-                   double standardDeviationOfServiceTime,
-                   Random random) {
-        checkMean(meanServiceTime);
-        checkStandardDeviation(standardDeviationOfServiceTime);
+    public static MeanServiceTimeSelector withRandom(Random random) {
         Objects.requireNonNull(random, "The input Random is null.");
+        Configuration configuration = new Configuration();
+        configuration.random = random;
+        return new MeanServiceTimeSelector(configuration);
+    }
+    
+    public static MeanServiceTimeSelector withDefaultRandom() {
+        return withRandom(new Random());
+    }
+    
+    private static final class Configuration {
+        private Random random;
+        private double meanServiceTime;
+        private double standardDeviationOfServiceTime;
+    }
+    
+    public final static class MeanServiceTimeSelector {
         
+        private final Configuration configuration;
+        
+        private MeanServiceTimeSelector(Configuration configuration) {
+            this.configuration = configuration;
+        }
+        
+        public StandardDeviationSelector 
+            withMeanServiceTime(double meanServiceTime) {
+            checkMean(meanServiceTime);
+            configuration.meanServiceTime = meanServiceTime;
+            return new StandardDeviationSelector(configuration);
+        }
+    }
+    
+    public final static class StandardDeviationSelector {
+        
+        private final Configuration configuration;
+        
+        private StandardDeviationSelector(Configuration configuration) {
+            this.configuration = configuration;
+        }
+        
+        public Cashier withStandardDeviationOfServiceTime(
+                double standardDeviationOfServiceTime) {
+            checkStandardDeviation(standardDeviationOfServiceTime);
+            return new Cashier(configuration.meanServiceTime,
+                               configuration.standardDeviationOfServiceTime,
+                               configuration.random);
+        }
+    }
+    
+    private Cashier(double meanServiceTime, 
+                    double standardDeviationOfServiceTime,
+                    Random random) {
         this.meanServiceTime = meanServiceTime;
         this.standardDeviationOfServiceTime = standardDeviationOfServiceTime;
         this.random = random;
