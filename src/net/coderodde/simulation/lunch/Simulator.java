@@ -1,6 +1,8 @@
 package net.coderodde.simulation.lunch;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -31,7 +33,7 @@ public final class Simulator {
     private final Map<AcademicDegree, Double> mapWaitTimeDeviation = 
             new HashMap<>();
     
-    private Queue<LunchQueueEvent> inputEventQueue;
+    private final List<Double> cashierIdleIntervals = new ArrayList<>();
     private Population population;
     
     public static PopulationSelector simulate() {
@@ -62,7 +64,9 @@ public final class Simulator {
     }
     
     private SimulationResult simulate(Population population, Cashier cashier) {
-        preprocess(population);
+        this.population = population;
+        Queue<LunchQueueEvent> inputEventQueue = population.toEventQueue();
+        preprocess(inputEventQueue);
         
         if (population.size() == 0) {
             return new SimulationResult(arrivalEventMap, servedEventMap);
@@ -70,9 +74,10 @@ public final class Simulator {
         
         PrioritizedQueue QUEUE = new PrioritizedQueue();
         double currentClock = inputEventQueue.peek().getTimestamp();
-        int personsPending = population.size();
         
-        while (personsPending > 0) {
+        for (int personsPending = population.size();
+                personsPending > 0;
+                personsPending--) {
             // Load all hungry people that arrived during the service of the 
             // previously served person.
             while (!inputEventQueue.isEmpty()
@@ -83,8 +88,12 @@ public final class Simulator {
             
             if (QUEUE.isEmpty()) {
                 LunchQueueEvent headEvent = inputEventQueue.remove();
-                QUEUE.push(headEvent);
+                cashierIdleIntervals.add(headEvent.getTimestamp() - 
+                                         currentClock);
                 currentClock = headEvent.getTimestamp();
+                QUEUE.push(headEvent);
+            } else {
+                cashierIdleIntervals.add(0.0);
             }
             
             // Admit an earliest + highest priority person to the cashier.
@@ -97,17 +106,13 @@ public final class Simulator {
             LunchQueueEvent servedEvent = new LunchQueueEvent(currentPerson, 
                                                               currentClock);
             servedEventMap.put(currentPerson, servedEvent);
-            personsPending--;
             // Served!
         }
         
         return postprocess();
     }
     
-    private void preprocess(Population population) {
-        this.population = population;
-        this.inputEventQueue = population.toEventQueue();
-
+    private void preprocess(Queue<LunchQueueEvent> inputEventQueue) {
         // groupCounts.keySet() will now list only those academic degrees that
         // are present in the population.
         for (LunchQueueEvent event : inputEventQueue) {
@@ -187,6 +192,43 @@ public final class Simulator {
                                                 mapWaitTimeDeviation
                                                         .get(degree));
         }
+        
+        // Process cashier idle time statistics:
+        if (cashierIdleIntervals.isEmpty()) {
+            return result;
+        }
+        
+        double sum = 0.0;
+        double min = cashierIdleIntervals.get(0);
+        double max = cashierIdleIntervals.get(0);
+        
+        for (double value : cashierIdleIntervals) {
+            sum += value;
+            
+            if (min > value) {
+                min = value;
+            } else if (max < value) {
+                max = value;
+            }
+        }
+        
+        double average = sum / cashierIdleIntervals.size();
+        
+        sum = 0.0;
+        
+        // Compute standard deviation:
+        for (double value : cashierIdleIntervals) {
+            double diff = average - value;
+            diff *= diff;
+            sum += diff;
+        }
+        
+        double standardDeviation = Math.sqrt(sum / cashierIdleIntervals.size());
+        
+        result.putCashierMinimumIdleTime(min);
+        result.putCashierAverageIdleTime(average);
+        result.putCashierMaximumIdleTime(max);
+        result.putCashierStandardDeviation(standardDeviation);
         
         return result;
     }

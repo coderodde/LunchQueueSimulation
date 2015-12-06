@@ -8,7 +8,7 @@ import java.util.Objects;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Dec 2, 2015)
  */
-public final class Person {
+public final class Person implements Comparable<Person> {
 
     private final String firstName;
     private final String lastName;
@@ -82,6 +82,11 @@ public final class Person {
     @Override
     public String toString() {
         return stringRepresentation;
+    }
+    
+    @Override
+    public int compareTo(Person o) {
+        return this.academicDegree.compareTo(o.getAcademicDegree());
     }
     
     @Override

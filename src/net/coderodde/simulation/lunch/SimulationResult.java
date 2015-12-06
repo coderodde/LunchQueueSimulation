@@ -27,20 +27,41 @@ public final class SimulationResult {
     private final Map<Person, LunchQueueEvent> arrivalEventMap;
     private final Map<Person, LunchQueueEvent> servedEventMap;
     
+    private double cashierMinimumIdleTime = Double.NaN;
+    private double cashierAverageIdleTime = Double.NaN;
+    private double cashierMaximumIdleTime = Double.NaN;
+    private double cashierStandardDeviation = Double.NaN;
+    
+    public double getMinimumWaitTime(AcademicDegree degree) {
+        return waitMinMap.getOrDefault(degree, Double.NaN);
+    }
+    
     public double getWaitAverage(AcademicDegree degree) {
         return waitAverageMap.getOrDefault(degree, Double.NaN);
+    }
+    
+    public double getMaximumWaitTime(AcademicDegree degree) {
+        return waitMaxMap.getOrDefault(degree, Double.NaN);
     }
     
     public double getWaitStandardDeviation(AcademicDegree degree) {
         return waitStandardDeviationMap.getOrDefault(degree, Double.NaN);
     }
     
-    public double getMinimumWaitTime(AcademicDegree degree) {
-        return waitMinMap.getOrDefault(degree, Double.NaN);
+    public double getCashierMinimumIdleTime() {
+        return cashierMinimumIdleTime;
     }
     
-    public double getMaximumWaitTime(AcademicDegree degree) {
-        return waitMaxMap.getOrDefault(degree, Double.NaN);
+    public double getCashierAverageIdleTime() {
+        return cashierAverageIdleTime;
+    }
+    
+    public double getCashierMaximumIdleTime() {
+        return cashierMaximumIdleTime;
+    }
+    
+    public double getCashierStandardDeviation() {
+        return cashierStandardDeviation;
     }
     
     SimulationResult(Map<Person, LunchQueueEvent> arrivalEventMap,
@@ -49,8 +70,16 @@ public final class SimulationResult {
         this.servedEventMap = servedEventMap;
     }
     
+    void putWaitMinimumTime(AcademicDegree degree, double minimumWaitTime) {
+        waitMinMap.put(degree, minimumWaitTime);
+    }
+    
     void putAverageWaitTime(AcademicDegree degree, double averageTime) {
         waitAverageMap.put(degree, averageTime);
+    }
+    
+    void putWaitMaximumTime(AcademicDegree degree, double maximumWaitTime) {
+        waitMaxMap.put(degree, maximumWaitTime);
     }
     
     void putWaitTimeStandardDeviation(AcademicDegree degree, 
@@ -58,12 +87,20 @@ public final class SimulationResult {
         waitStandardDeviationMap.put(degree, timeStandardDeviation);
     }
     
-    void putWaitMinimumTime(AcademicDegree degree, double minimumWaitTime) {
-        waitMinMap.put(degree, minimumWaitTime);
+    void putCashierMinimumIdleTime(double cashierMinimumIdleTime) {
+        this.cashierMinimumIdleTime = cashierMinimumIdleTime;
     }
     
-    void putWaitMaximumTime(AcademicDegree degree, double maximumWaitTime) {
-        waitMaxMap.put(degree, maximumWaitTime);
+    void putCashierAverageIdleTime(double cashierAverageIdleTime) {
+        this.cashierAverageIdleTime = cashierAverageIdleTime;
+    }
+    
+    void putCashierMaximumIdleTime(double cashierMaximumIdleTime) {
+        this.cashierMaximumIdleTime = cashierMaximumIdleTime;
+    }
+    
+    void putCashierStandardDeviation(double cashierStandardDeviation) {
+        this.cashierStandardDeviation = cashierStandardDeviation;
     }
     
     @Override
@@ -96,34 +133,52 @@ public final class SimulationResult {
         toString(sb, AcademicDegree.MASTER);
         toString(sb, AcademicDegree.BACHELOR);
         toString(sb, AcademicDegree.UNDERGRADUATE);
-        // Cut off the last character which is a new line character.
-        return sb.substring(0, sb.length() - 1);
+        
+        sb.append("Cashier:")
+          .append(NL)
+          .append(SKIP)
+          .append(String.format("Minimum idle time:  %.0f seconds.", 
+                                getCashierMinimumIdleTime()))
+          .append(NL)
+          .append(SKIP)
+          .append(String.format("Average idle time:  %.0f seconds.", 
+                                getCashierAverageIdleTime()))
+          .append(NL)
+          .append(SKIP)
+          .append(String.format("Maximum idle time:  %.0f seconds.", 
+                                getCashierMaximumIdleTime()))
+          .append(NL)
+          .append(SKIP)
+          .append(String.format("Standard deviation: %.0f seconds.", 
+                                getCashierStandardDeviation()));
+        
+        return sb.toString();
     }
     
     private void toString(StringBuilder sb, AcademicDegree degree) {
         sb.append(degree.toString()).append(":").append(NL);
         
         sb.append(SKIP)
-          .append("Average wait time:            ")
-          .append(String.format("%.0f", getWaitAverage(degree)))
-          .append(" seconds.")
-          .append(NL);
-        
-        sb.append(SKIP)
-          .append("Wait time standard deviation: ")
-          .append(String.format("%.0f", getWaitStandardDeviation(degree)))
-          .append(" seconds.")
-          .append(NL);
-        
-        sb.append(SKIP)
-          .append("Minimum wait time:            ")
+          .append("Minimum wait time:  ")
           .append(String.format("%.0f", getMinimumWaitTime(degree)))
           .append(" seconds.")
           .append(NL);
         
         sb.append(SKIP)
-          .append("Maximum wait time:            ")
+          .append("Average wait time:  ")
+          .append(String.format("%.0f", getWaitAverage(degree)))
+          .append(" seconds.")
+          .append(NL);
+        
+        sb.append(SKIP)
+          .append("Maximum wait time:  ")
           .append(String.format("%.0f", getMaximumWaitTime(degree)))
+          .append(" seconds.")
+          .append(NL);
+        
+        sb.append(SKIP)
+          .append("Standard deviation: ")
+          .append(String.format("%.0f", getWaitStandardDeviation(degree)))
           .append(" seconds.")
           .append(NL);
     }

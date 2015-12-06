@@ -8,6 +8,7 @@ package net.coderodde.simulation.lunch;
  */
 public enum AcademicDegree {
    
+    // The order denotes priority from highest to lowest.
     DOCTOR       ("PhD"),
     MASTER       ("MSc"),
     BACHELOR     ("BSc"),

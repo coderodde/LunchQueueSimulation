@@ -61,7 +61,20 @@ public final class Population {
                                               arrivalTimeMap.get(person)));
         });
         
-        Collections.sort(eventList);
+        Collections.sort(eventList, 
+                        (event1, event2) -> {
+            // Try to compare by the time stamps of the events.
+            int cmp = event1.compareTo(event2);
+            
+            if (cmp != 0) {
+                return cmp;
+            }
+            
+            // The two input events have same time stamp, break ties by person
+            // priority.
+            return event1.getPerson().compareTo(event2.getPerson());
+        });
+        
         return new ArrayDeque<>(eventList);
     }
 }
