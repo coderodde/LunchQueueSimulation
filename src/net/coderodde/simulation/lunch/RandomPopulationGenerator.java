@@ -30,65 +30,75 @@ public final class RandomPopulationGenerator {
      * @param  random the random number generator to use.
      * @return a degree selector.
      */
-    public static DegreeSelector withRandom(Random random) {
+    public static DegreeCountSelector withRandom(Random random) {
         Objects.requireNonNull(random, "The input Random is null.");
         Configuration configuration = new Configuration();
         configuration.random = random;
-        return new DegreeSelector(configuration);
+        return new DegreeCountSelector(configuration);
     }
     
     /**
      * Initiates the strong fluent API for constructing a 
-     * {@code RandomPopulationGenerator} using the default {@code Random}.
+     * {@code RandomPopulationGenerator} using a default {@code Random}.
      * 
      * @return a degree selector.
      */
-    public static DegreeSelector withDefaultRandom() {
+    public static DegreeCountSelector withDefaultRandom() {
         return withRandom(new Random());
     }
     
-    public static final class DegreeSelector {
+    public static final class DegreeCountSelector {
         
         private final Configuration configuration;
         
-        DegreeSelector(Configuration configuration) {
+        DegreeCountSelector(Configuration configuration) {
             this.configuration = configuration;
         }
         
         /**
-         * Assigns the desired count to an {@code AcademicDegree}.
+         * Starts constructing a population  wit selected academic degree.
          * 
-         * @param degree the target degree.
-         * @param count  the amount of persons with {@code degree}.
-         * @return this degree selector for further additions.
+         * @param  count the number of persons for a degree group.
+         * @return a degree selector for the group being constructed.
          */
-        public DegreeSelector withDegreeCount(AcademicDegree degree, 
-                                              int count) {
-            Objects.requireNonNull(degree, "The input degree is null.");
-            
-            if (count <= 0) {
+        public DegreeSelector with(int count) {
+            if (count < 0) {
                 throw new IllegalArgumentException(
-                        "The degree count is not positive: " + count);
+                        "The people count is negative: " + count);
             }
             
-            configuration.distribution.put(degree, count);
-            return this;
+            return new DegreeSelector(configuration, count);
         }
         
         /**
-         * Selects the mean lunch time and returns the standard deviation 
-         * selector.
+         * Terminates creation of groups and selects a mean time at which people
+         * go for a lunch. (Lunch time does not mean the duration of a lunch.)
          * 
-         * @param  meanLunchTime the mean lunch time in seconds. (Not duration,
-         *                       but rather the time at which people 
-         *                       <b>go</b> to lunch.
-         * @return standard deviation selector.
+         * @param  meanLunchTime the mean of lunch times 
+         * @return a standard deviation selector.
          */
         public StandardDeviationSelector 
             withMeanLunchTime(double meanLunchTime) {
             checkMean(meanLunchTime);
             configuration.meanLunchTime = meanLunchTime;
             return new StandardDeviationSelector(configuration);
+        }
+    }
+    
+    public static final class DegreeSelector {
+        
+        private final Configuration configuration;
+        private final int count;
+        
+        DegreeSelector(Configuration configuration, int count) {
+            this.configuration = configuration;
+            this.count = count;
+        }
+        
+        public DegreeCountSelector peopleWithDegree(AcademicDegree degree) {
+            Objects.requireNonNull(degree, "The input degree is null.");
+            configuration.distribution.put(degree, count);
+            return new DegreeCountSelector(configuration);
         }
     }
     

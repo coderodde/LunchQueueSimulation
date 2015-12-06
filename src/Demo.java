@@ -50,14 +50,32 @@ public class Demo {
         Random random = new Random(seed);
         
         population = 
-                RandomPopulationGenerator
-                        .withRandom(random)
-                        .withDegreeCount(AcademicDegree.DOCTOR,        15)
-                        .withDegreeCount(AcademicDegree.MASTER,        40)
-                        .withDegreeCount(AcademicDegree.BACHELOR,      100)
-                        .withDegreeCount(AcademicDegree.UNDERGRADUATE, 250)
-                        .withMeanLunchTime(10800.0)
-                        .withLunchTimeStandardDeviation(2000.0);
+                RandomPopulationGenerator 
+                .withRandom(random)
+                .with(15).peopleWithDegree(AcademicDegree.DOCTOR)
+                .with(40).peopleWithDegree(AcademicDegree.MASTER)
+                .with(100).peopleWithDegree(AcademicDegree.BACHELOR)
+                .with(250).peopleWithDegree(AcademicDegree.UNDERGRADUATE)
+                .withMeanLunchTime(10800.0)
+                .withLunchTimeStandardDeviation(1200.0);
+//        population = 
+//                RandomPopulationGenerator
+//                        .withRandom(random)
+//                        .withDegreeCount(AcademicDegree.DOCTOR,        15)
+//                        .withDegreeCount(AcademicDegree.MASTER,        40)
+//                        .withDegreeCount(AcademicDegree.BACHELOR,      100)
+//                        .withDegreeCount(AcademicDegree.UNDERGRADUATE, 250)
+//                        .withMeanLunchTime(10800.0)
+//                        .withLunchTimeStandardDeviation(2000.0);
+//        population = 
+//                RandomPopulationGenerator
+//                        .withRandom(random)
+//                        .withDegreeCount(AcademicDegree.DOCTOR,        15)
+//                        .withDegreeCount(AcademicDegree.MASTER,        40)
+//                        .withDegreeCount(AcademicDegree.BACHELOR,      100)
+//                        .withDegreeCount(AcademicDegree.UNDERGRADUATE, 250)
+//                        .withMeanLunchTime(10800.0)
+//                        .withLunchTimeStandardDeviation(2000.0);
                         
         // Cashier serves in average in 15 seconds, s.d. 2 seconds.
         cashier = Cashier.withRandom(random)
