@@ -9,9 +9,9 @@ package net.coderodde.simulation.lunch;
 final class LunchQueueEvent implements Comparable<LunchQueueEvent> {
     
     private final Person person;
-    private final double timeStamp;
+    private final int timeStamp;
     
-    LunchQueueEvent(Person person, double timeStamp) {
+    LunchQueueEvent(Person person, int timeStamp) {
         this.person = person;
         this.timeStamp = timeStamp;
     }
@@ -20,7 +20,7 @@ final class LunchQueueEvent implements Comparable<LunchQueueEvent> {
         return person;
     }
     
-    double getTimestamp() {
+    int getTimestamp() {
         return timeStamp;
     }
     

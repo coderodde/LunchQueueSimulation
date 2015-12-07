@@ -190,9 +190,9 @@ public final class RandomPopulationGenerator {
         return population;
     }
     
-    private double getRandomLunchTime() {
-        return meanLunchTime + standardDeviationOfLunchTime * 
-                               random.nextGaussian();
+    private int getRandomLunchTime() {
+        return (int)(meanLunchTime + standardDeviationOfLunchTime * 
+                                     random.nextGaussian());
     }
     
     private static final class Configuration {

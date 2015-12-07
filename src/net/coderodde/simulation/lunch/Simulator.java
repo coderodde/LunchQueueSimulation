@@ -22,18 +22,18 @@ public final class Simulator {
             new HashMap<>();
     private final Map<AcademicDegree, Integer> groupCounts = new HashMap<>();
     
-    private final Map<AcademicDegree, Double> mapMinimumWaitTime = 
+    private final Map<AcademicDegree, Integer> mapMinimumWaitTime = 
             new HashMap<>();
-    private final Map<AcademicDegree, Double> mapMaximumWaitTime = 
+    private final Map<AcademicDegree, Integer> mapMaximumWaitTime = 
             new HashMap<>();
-    private final Map<AcademicDegree, Double> mapAverageWaitTime = 
+    private final Map<AcademicDegree, Integer> mapAverageWaitTime = 
             new HashMap<>();
-    private final Map<AcademicDegree, Double> mapWaitTimeSum     = 
+    private final Map<AcademicDegree, Integer> mapWaitTimeSum     = 
             new HashMap<>();
-    private final Map<AcademicDegree, Double> mapWaitTimeDeviation = 
+    private final Map<AcademicDegree, Integer> mapWaitTimeDeviation = 
             new HashMap<>();
     
-    private final List<Double> cashierIdleIntervals = new ArrayList<>();
+    private final List<Integer> cashierIdleIntervals = new ArrayList<>();
     private Population population;
     
     public static PopulationSelector simulate() {
@@ -73,7 +73,7 @@ public final class Simulator {
         }
         
         PrioritizedQueue QUEUE = new PrioritizedQueue();
-        double currentClock = inputEventQueue.peek().getTimestamp();
+        int currentClock = inputEventQueue.peek().getTimestamp();
         
         for (int personsPending = population.size();
                 personsPending > 0;
@@ -93,7 +93,7 @@ public final class Simulator {
                 currentClock = headEvent.getTimestamp();
                 QUEUE.push(headEvent);
             } else {
-                cashierIdleIntervals.add(0.0);
+                cashierIdleIntervals.add(0);
             }
             
             // Admit an earliest + highest priority person to the cashier.
@@ -127,9 +127,9 @@ public final class Simulator {
         // Start computing system statistics.
         
         for (AcademicDegree degree : groupCounts.keySet()) {
-            mapMinimumWaitTime.put(degree, Double.POSITIVE_INFINITY);
-            mapMaximumWaitTime.put(degree, Double.NEGATIVE_INFINITY);
-            mapWaitTimeSum.put(degree, 0.0);
+            mapMinimumWaitTime.put(degree, Integer.MAX_VALUE);
+            mapMaximumWaitTime.put(degree, Integer.MIN_VALUE);
+            mapWaitTimeSum.put(degree, 0);
         }
         
         // Computing minimum/maximum wait time for each academic degree.
@@ -137,8 +137,8 @@ public final class Simulator {
             LunchQueueEvent arrivalEvent = arrivalEventMap.get(person);
             LunchQueueEvent servedEvent  = servedEventMap.get(person);
             
-            double waitTime = servedEvent.getTimestamp() - 
-                              arrivalEvent.getTimestamp();
+            int waitTime = servedEvent.getTimestamp() - 
+                           arrivalEvent.getTimestamp();
             
             AcademicDegree degree = person.getAcademicDegree();
             
@@ -155,19 +155,20 @@ public final class Simulator {
         
         // Computing the average waiting time for each academic degree.
         for (AcademicDegree degree : groupCounts.keySet()) {
-            double average = mapWaitTimeSum.get(degree) / 
-                             groupCounts.get(degree);
+            int average = (int) Math.round(1.0 * mapWaitTimeSum.get(degree) / 
+                                           groupCounts.get(degree));
+            
             mapAverageWaitTime.put(degree, average);
-            mapWaitTimeDeviation.put(degree, 0.0);
+            mapWaitTimeDeviation.put(degree, 0);
         }
         
         for (Person person : population.getPersonSet()) {
             AcademicDegree degree = person.getAcademicDegree();
             
-            double duration = servedEventMap.get(person).getTimestamp() -
-                              arrivalEventMap.get(person).getTimestamp();
+            int duration = servedEventMap.get(person).getTimestamp() -
+                          arrivalEventMap.get(person).getTimestamp();
             
-            double contribution = duration - mapAverageWaitTime.get(degree);
+            int contribution = duration - mapAverageWaitTime.get(degree);
             
             contribution *= contribution;
             mapWaitTimeDeviation.put(degree, 
@@ -176,9 +177,12 @@ public final class Simulator {
         }
         
         for (AcademicDegree degree : groupCounts.keySet()) {
-            double sum = mapWaitTimeDeviation.get(degree);
+            int sum = mapWaitTimeDeviation.get(degree);
             mapWaitTimeDeviation.put(degree, 
-                                     Math.sqrt(sum / groupCounts.get(degree)));
+                                     (int) Math.round(
+                                             Math.sqrt(sum / 
+                                                       groupCounts
+                                                               .get(degree))));
         }
         
         SimulationResult result = new SimulationResult(arrivalEventMap, 
@@ -198,11 +202,11 @@ public final class Simulator {
             return result;
         }
         
-        double sum = 0.0;
-        double min = cashierIdleIntervals.get(0);
-        double max = cashierIdleIntervals.get(0);
+        int sum = 0;
+        int min = cashierIdleIntervals.get(0);
+        int max = cashierIdleIntervals.get(0);
         
-        for (double value : cashierIdleIntervals) {
+        for (int value : cashierIdleIntervals) {
             sum += value;
             
             if (min > value) {
@@ -212,21 +216,23 @@ public final class Simulator {
             }
         }
         
-        double average = sum / cashierIdleIntervals.size();
+        double average = 1.0 * sum / cashierIdleIntervals.size();
         
-        sum = 0.0;
+        sum = 0;
         
         // Compute standard deviation:
-        for (double value : cashierIdleIntervals) {
+        for (int value : cashierIdleIntervals) {
             double diff = average - value;
             diff *= diff;
             sum += diff;
         }
         
-        double standardDeviation = Math.sqrt(sum / cashierIdleIntervals.size());
+        int standardDeviation = 
+                (int)(Math.round(
+                        Math.sqrt(1.0 *sum / cashierIdleIntervals.size())));
         
         result.putCashierMinimumIdleTime(min);
-        result.putCashierAverageIdleTime(average);
+        result.putCashierAverageIdleTime((int)(Math.round(average)));
         result.putCashierMaximumIdleTime(max);
         result.putCashierStandardDeviation(standardDeviation);
         

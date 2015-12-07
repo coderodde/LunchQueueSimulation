@@ -16,51 +16,52 @@ public final class SimulationResult {
 
     private static final String NL = "\n";
     private static final String SKIP = "    ";
+    private static final int NO_DATA = -1;
     
-    private final Map<AcademicDegree, Double> waitAverageMap = new HashMap<>();
-    private final Map<AcademicDegree, Double> waitStandardDeviationMap = 
+    private final Map<AcademicDegree, Integer> waitAverageMap = new HashMap<>();
+    private final Map<AcademicDegree, Integer> waitStandardDeviationMap = 
             new HashMap<>();
     
-    private final Map<AcademicDegree, Double> waitMinMap = new HashMap<>();
-    private final Map<AcademicDegree, Double> waitMaxMap = new HashMap<>();
+    private final Map<AcademicDegree, Integer> waitMinMap = new HashMap<>();
+    private final Map<AcademicDegree, Integer> waitMaxMap = new HashMap<>();
     
     private final Map<Person, LunchQueueEvent> arrivalEventMap;
     private final Map<Person, LunchQueueEvent> servedEventMap;
     
-    private double cashierMinimumIdleTime = Double.NaN;
-    private double cashierAverageIdleTime = Double.NaN;
-    private double cashierMaximumIdleTime = Double.NaN;
-    private double cashierStandardDeviation = Double.NaN;
+    private int cashierMinimumIdleTime = NO_DATA;
+    private int cashierAverageIdleTime = NO_DATA;
+    private int cashierMaximumIdleTime = NO_DATA;
+    private int cashierStandardDeviation = NO_DATA;
     
-    public double getMinimumWaitTime(AcademicDegree degree) {
-        return waitMinMap.getOrDefault(degree, Double.NaN);
+    public int getMinimumWaitTime(AcademicDegree degree) {
+        return waitMinMap.getOrDefault(degree, NO_DATA);
     }
     
-    public double getWaitAverage(AcademicDegree degree) {
-        return waitAverageMap.getOrDefault(degree, Double.NaN);
+    public int getWaitAverage(AcademicDegree degree) {
+        return waitAverageMap.getOrDefault(degree, NO_DATA);
     }
     
-    public double getMaximumWaitTime(AcademicDegree degree) {
-        return waitMaxMap.getOrDefault(degree, Double.NaN);
+    public int getMaximumWaitTime(AcademicDegree degree) {
+        return waitMaxMap.getOrDefault(degree, NO_DATA);
     }
     
-    public double getWaitStandardDeviation(AcademicDegree degree) {
-        return waitStandardDeviationMap.getOrDefault(degree, Double.NaN);
+    public int getWaitStandardDeviation(AcademicDegree degree) {
+        return waitStandardDeviationMap.getOrDefault(degree, NO_DATA);
     }
     
-    public double getCashierMinimumIdleTime() {
+    public int getCashierMinimumIdleTime() {
         return cashierMinimumIdleTime;
     }
     
-    public double getCashierAverageIdleTime() {
+    public int getCashierAverageIdleTime() {
         return cashierAverageIdleTime;
     }
     
-    public double getCashierMaximumIdleTime() {
+    public int getCashierMaximumIdleTime() {
         return cashierMaximumIdleTime;
     }
     
-    public double getCashierStandardDeviation() {
+    public int getCashierStandardDeviation() {
         return cashierStandardDeviation;
     }
     
@@ -70,36 +71,36 @@ public final class SimulationResult {
         this.servedEventMap = servedEventMap;
     }
     
-    void putWaitMinimumTime(AcademicDegree degree, double minimumWaitTime) {
+    void putWaitMinimumTime(AcademicDegree degree, int minimumWaitTime) {
         waitMinMap.put(degree, minimumWaitTime);
     }
     
-    void putAverageWaitTime(AcademicDegree degree, double averageTime) {
+    void putAverageWaitTime(AcademicDegree degree, int averageTime) {
         waitAverageMap.put(degree, averageTime);
     }
     
-    void putWaitMaximumTime(AcademicDegree degree, double maximumWaitTime) {
+    void putWaitMaximumTime(AcademicDegree degree, int maximumWaitTime) {
         waitMaxMap.put(degree, maximumWaitTime);
     }
     
     void putWaitTimeStandardDeviation(AcademicDegree degree, 
-                                      double timeStandardDeviation) {
+                                      int timeStandardDeviation) {
         waitStandardDeviationMap.put(degree, timeStandardDeviation);
     }
     
-    void putCashierMinimumIdleTime(double cashierMinimumIdleTime) {
+    void putCashierMinimumIdleTime(int cashierMinimumIdleTime) {
         this.cashierMinimumIdleTime = cashierMinimumIdleTime;
     }
     
-    void putCashierAverageIdleTime(double cashierAverageIdleTime) {
+    void putCashierAverageIdleTime(int cashierAverageIdleTime) {
         this.cashierAverageIdleTime = cashierAverageIdleTime;
     }
     
-    void putCashierMaximumIdleTime(double cashierMaximumIdleTime) {
+    void putCashierMaximumIdleTime(int cashierMaximumIdleTime) {
         this.cashierMaximumIdleTime = cashierMaximumIdleTime;
     }
     
-    void putCashierStandardDeviation(double cashierStandardDeviation) {
+    void putCashierStandardDeviation(int cashierStandardDeviation) {
         this.cashierStandardDeviation = cashierStandardDeviation;
     }
     
@@ -137,20 +138,24 @@ public final class SimulationResult {
         sb.append("Cashier:")
           .append(NL)
           .append(SKIP)
-          .append(String.format("Minimum idle time:  %.0f seconds.", 
-                                getCashierMinimumIdleTime()))
+          .append("Minimum idle time:  ")
+          .append(getCashierMinimumIdleTime())
+          .append(" seconds.")
           .append(NL)
           .append(SKIP)
-          .append(String.format("Average idle time:  %.0f seconds.", 
-                                getCashierAverageIdleTime()))
+          .append("Average idle time:  ")
+          .append(getCashierAverageIdleTime())
+          .append(" seconds.")
           .append(NL)
           .append(SKIP)
-          .append(String.format("Maximum idle time:  %.0f seconds.", 
-                                getCashierMaximumIdleTime()))
+          .append("Maximum idle time:  ")
+          .append(getCashierMaximumIdleTime())
+          .append(" seconds.")
           .append(NL)
           .append(SKIP)
-          .append(String.format("Standard deviation: %.0f seconds.", 
-                                getCashierStandardDeviation()));
+          .append("Standard deviation: ")
+          .append(getCashierStandardDeviation())
+          .append(" seconds.");
         
         return sb.toString();
     }
@@ -160,25 +165,25 @@ public final class SimulationResult {
         
         sb.append(SKIP)
           .append("Minimum wait time:  ")
-          .append(String.format("%.0f", getMinimumWaitTime(degree)))
+          .append(getMinimumWaitTime(degree))
           .append(" seconds.")
           .append(NL);
         
         sb.append(SKIP)
           .append("Average wait time:  ")
-          .append(String.format("%.0f", getWaitAverage(degree)))
+          .append(getWaitAverage(degree))
           .append(" seconds.")
           .append(NL);
         
         sb.append(SKIP)
           .append("Maximum wait time:  ")
-          .append(String.format("%.0f", getMaximumWaitTime(degree)))
+          .append(getMaximumWaitTime(degree))
           .append(" seconds.")
           .append(NL);
         
         sb.append(SKIP)
           .append("Standard deviation: ")
-          .append(String.format("%.0f", getWaitStandardDeviation(degree)))
+          .append(getWaitStandardDeviation(degree))
           .append(" seconds.")
           .append(NL);
     }

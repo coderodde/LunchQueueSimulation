@@ -19,7 +19,7 @@ import static net.coderodde.simulation.lunch.Utils.checkTime;
  */
 public final class Population {
     
-    private final Map<Person, Double> arrivalTimeMap = new HashMap<>();
+    private final Map<Person, Integer> arrivalTimeMap = new HashMap<>();
     
     public final class ArrivalTimeSelector {
         private final Person person;
@@ -29,7 +29,7 @@ public final class Population {
                                                  "The input person is null.");
         }
         
-        public boolean withArrivalTime(double arrivalTime) {
+        public boolean withArrivalTime(int arrivalTime) {
             checkTime(arrivalTime);
             
             if (arrivalTimeMap.containsKey(person)) {
