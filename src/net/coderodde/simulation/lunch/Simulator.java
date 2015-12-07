@@ -101,7 +101,7 @@ public final class Simulator {
             Person currentPerson = currentEvent.getPerson();
             
             // Serving...
-            double serviceTime = cashier.getServiceTime();
+            int serviceTime = cashier.getServiceTime();
             currentClock += serviceTime;
             LunchQueueEvent servedEvent = new LunchQueueEvent(currentPerson, 
                                                               currentClock);

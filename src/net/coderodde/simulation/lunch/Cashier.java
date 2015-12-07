@@ -96,9 +96,10 @@ public final class Cashier {
         this.random = random;
     }
     
-    public double getServiceTime() {
-        return meanServiceTime + standardDeviationOfServiceTime * 
-                                 random.nextGaussian();
+    public int getServiceTime() {
+        return (int)(Math.round(meanServiceTime + 
+                                    standardDeviationOfServiceTime * 
+                                    random.nextGaussian()));
     }
     
     private static final class Configuration {

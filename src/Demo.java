@@ -1,6 +1,7 @@
 import java.util.Random;
 import net.coderodde.simulation.lunch.AcademicDegree;
 import net.coderodde.simulation.lunch.Cashier;
+import net.coderodde.simulation.lunch.Person;
 import net.coderodde.simulation.lunch.Population;
 import net.coderodde.simulation.lunch.RandomPopulationGenerator;
 import net.coderodde.simulation.lunch.SimulationResult;
@@ -9,6 +10,9 @@ import net.coderodde.simulation.lunch.Simulator;
 public class Demo {
     
     public static void main(final String... args) {
+        Person person = Person.withFirstName("Jack")
+                              .withLastName("Cooley")
+                              .withAcademicDegree(AcademicDegree.BACHELOR);
         long seed = System.nanoTime();
         Random random = new Random(seed);
         
