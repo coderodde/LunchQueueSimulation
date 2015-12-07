@@ -1,10 +1,10 @@
 package net.coderodde.simulation.lunch;
 
 import java.util.ArrayDeque;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.TreeMap;
 
 /**
  * This class implements a FIFO queue over priority categories. Not to be 
@@ -16,7 +16,7 @@ import java.util.TreeMap;
 final class PrioritizedQueue {
    
     private final Map<AcademicDegree, Queue<LunchQueueEvent>> map 
-            = new TreeMap<>();
+            = new EnumMap<>(AcademicDegree.class);
     
     private int size;
     
